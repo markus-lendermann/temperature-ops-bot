@@ -12,14 +12,24 @@ def urlParse(text):
 
 
 parsed_url = json.loads(urlParse(req_text))
-print(parsed_url["groupName"])
-print(parsed_url["groupCode"])
-print(json.dumps(parsed_url["members"]))
+# print(parsed_url["groupName"])
+# print(parsed_url["groupCode"])
+# print(json.dumps(parsed_url["members"]))
 
 group_members = json.loads(json.dumps(parsed_url["members"]))
 
-print('Please choose your name from the following list:\n' + '\n'.join([str(i+1) + '. ' + group_members[i]["identifier"] for i in range(len(group_members))]))
+text = "Mr Teow"
 
-print([[item["identifier"]] for item in group_members])
+try:
+    index = [obj["identifier"] for obj in group_members].index(text)
+    print(group_members[index]["id"])
+    print(group_members[index]["identifier"])
+    print(group_members[index]["hasPin"])
+except ValueError:
+    print("no")
+
+# print('Please choose your name from the following list:\n' + '\n'.join([str(i+1) + '. ' + group_members[i]["identifier"] for i in range(len(group_members))]))
+
+# print([[item["identifier"]] for item in group_members])
 
 # msg = 'Please choose your name from the following list:\n' + '\n'.join([str(i + 1) + '.' + group_members[i].split(',')[1] for i in range(len(group_members))]

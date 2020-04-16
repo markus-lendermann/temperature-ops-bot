@@ -278,7 +278,6 @@ class WebhookHandler(webapp2.RequestHandler):
             logging.info('send response:')
             logging.info(resp)
 
-
         if text is None:
             reply(strings["no_text_error"])
             return
@@ -355,8 +354,8 @@ class WebhookHandler(webapp2.RequestHandler):
         elif client.status == '2':
             if text == strings["group_keyboard_yes"]:
                 gm = json.loads(client.groupMembers)
-                name_list = '\n'.join([str(i+1) + '. ' + gm[i]["identifier"] for i in range(len(gm))])
-                msg = strings["member_msg"] + name_list
+                name_list = '\n'.join([str(i + 1) + '. ' + gm[i]["identifier"] for i in range(len(gm))])
+                msg = strings["member_msg_1"] + name_list
                 markup = {
                     "keyboard": [[item["identifier"]] for item in gm],
                     "one_time_keyboard": True
@@ -385,44 +384,33 @@ class WebhookHandler(webapp2.RequestHandler):
                 return
 
         elif client.status == '3':
-            group_members = client.groupMembers
+            gm = json.loads(client.groupMembers)
+            try:
+                index = [obj["identifier"] for obj in gm].index(text)
+                client.memberId = gm[index]["id"]
+                client.memberName = gm[index]["identifier"]
+                client.pin = gm[index]["hasPin"]
 
-            flag = False
-            for item in group_members:
-                member_id = item.split(',')[0]
-                member_name = item.split(',')[1][1:]
-                pin = item.split(',')[2][1:]
-                if member_name == text:
-                    flag = True
-                    client.memberId = member_id
-                    client.memberName = member_name
-                    client.pin = pin
-            if flag:
-                form_fields = {
-                    'chat_id': str(chat_id),
-                    'text': 'You entered the name ' + client.memberName + '.',
-                    'reply_markup': {
-                        "keyboard": [
-                            [
-                                strings["member keyboard yes"],
-                                strings["member keyboard no"]
-                            ]
-                        ],
-                        "one_time_keyboard": True
-                    }
+                msg = strings["member_msg_2"].format(client.memberName)
+                markup = {
+                    "keyboard": [
+                        [
+                            strings["member_keyboard_yes"],
+                            strings["member_keyboard_no"]
+                        ]
+                    ],
+                    "one_time_keyboard": True
                 }
-                requests.post(BASE_URL + 'sendMessage', json=form_fields)
+                message(msg, markup)
                 client.status = '4'
-            else:
-                form_fields = {
-                    'chat_id': str(chat_id),
-                    'text': strings["use keyboard"],
-                    'reply_markup': {
-                        "keyboard": [[item.split(',')[1][1:]] for item in group_members],
-                        "one_time_keyboard": True
-                    }
+            except ValueError:
+                # user input does not match any identifier
+                msg = strings["use keyboard"]
+                markup = {
+                    "keyboard": [[item["identifier"]] for item in gm],
+                    "one_time_keyboard": True
                 }
-                requests.post(BASE_URL + 'sendMessage', json=form_fields)
+                message(msg, markup)
             client.put()
             return
 
