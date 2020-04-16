@@ -19,7 +19,7 @@
   "member_keyboard_yes": "That's me",
   "member_keyboard_no": "I chose wrongly",
   "member_id_msg": "Your member ID is {}.",
-  "member_overflow": "This group has too many members for Telegram to allow me to display them for you to choose. You're gonna have to type your name in exactly like how it appears on the website:",
+  "member_overflow": "This group has too many members for Telegram to display them for you to choose. You're gonna have to type your name in exactly like how it appears on the website:",
   "member_overflow_wrong": "Whatever you just typed isn't within the list of members in your group. Wake up your idea and type your name correctly.",
   "pin_msg_1": "Please enter your pin:",
   "pin_msg_2": "You entered {} as your pin.",
