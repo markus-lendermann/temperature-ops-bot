@@ -196,7 +196,14 @@
       <option name="project" value="LOCAL" />
       <updated>1587031128900</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="refactoring">
+      <created>1587036588042</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1587036588042</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -215,33 +222,49 @@
     </state>
     <state x="96" y="0" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1280.680@0.0.1280.680" timestamp="1586325103148" />
     <state x="144" y="0" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1587014989546" />
-    <state x="637" y="70" key="CommitChangelistDialog2" timestamp="1587031128475">
+    <state x="637" y="70" key="CommitChangelistDialog2" timestamp="1587036587623">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="293" y="0" key="CommitChangelistDialog2/0.0.1280.680@0.0.1280.680" timestamp="1586949903575" />
-    <state x="637" y="70" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1587031128475" />
+    <state x="637" y="70" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1587036587623" />
     <state x="686" y="243" key="FileChooserDialogImpl" timestamp="1587030874011">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="458" y="159" key="FileChooserDialogImpl/0.0.1280.680@0.0.1280.680" timestamp="1587012404495" />
     <state x="549" y="215" key="FileChooserDialogImpl/0.0.1536.920@0.0.1536.920" timestamp="1586131993614" />
     <state x="686" y="243" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1587030874011" />
-    <state width="1899" height="202" key="GridCell.Tab.0.bottom" timestamp="1587032161627">
+    <state width="1899" height="202" key="GridCell.Tab.0.bottom" timestamp="1587051787325">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="202" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1587032161627" />
-    <state width="1899" height="202" key="GridCell.Tab.0.center" timestamp="1587032161627">
+    <state width="1899" height="202" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1587051787325" />
+    <state width="1899" height="202" key="GridCell.Tab.0.center" timestamp="1587051787325">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="202" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1587032161627" />
-    <state width="1899" height="202" key="GridCell.Tab.0.left" timestamp="1587032161627">
+    <state width="1899" height="202" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1587051787325" />
+    <state width="1899" height="202" key="GridCell.Tab.0.left" timestamp="1587051787325">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="202" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1587032161627" />
-    <state width="1899" height="202" key="GridCell.Tab.0.right" timestamp="1587032161627">
+    <state width="1899" height="202" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1587051787325" />
+    <state width="1899" height="202" key="GridCell.Tab.0.right" timestamp="1587051787325">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="202" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1587032161627" />
+    <state width="1899" height="202" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1587051787325" />
+    <state width="1899" height="348" key="GridCell.Tab.1.bottom" timestamp="1587047199703">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1587047199703" />
+    <state width="1899" height="348" key="GridCell.Tab.1.center" timestamp="1587047199703">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1587047199703" />
+    <state width="1899" height="348" key="GridCell.Tab.1.left" timestamp="1587047199702">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1587047199702" />
+    <state width="1899" height="348" key="GridCell.Tab.1.right" timestamp="1587047199703">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1587047199703" />
     <state x="759" y="231" key="RollbackChangesDialog" timestamp="1586596050550">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -256,10 +279,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="769" y="437" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1586596042238" />
-    <state x="539" y="220" width="840" height="767" key="search.everywhere.popup" timestamp="1587032126954">
+    <state x="539" y="220" width="840" height="767" key="search.everywhere.popup" timestamp="1587042577676">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="431" y="195" width="672" height="678" key="search.everywhere.popup/0.0.1536.920@0.0.1536.920" timestamp="1583449645634" />
-    <state x="539" y="220" width="840" height="767" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1587032126954" />
+    <state x="539" y="220" width="840" height="767" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1587042577676" />
   </component>
 </project>

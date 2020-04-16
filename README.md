@@ -1,6 +1,6 @@
 # temperature-ops-bot
 
-Telegram bot for helping users to submit their temperatures to http://temptaking.ado.sg so they don't sign extras.
+Telegram bot that helps users submit their temperatures to http://temptaking.ado.sg so they don't sign extras.
 
 Hosted on [Google Cloud Platform](https://cloud.google.com/appengine)
 
