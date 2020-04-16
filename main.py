@@ -240,13 +240,15 @@ class WebhookHandler(webapp2.RequestHandler):
                         'chat_id': str(chat_id),
                         'text': msg,
                         'reply_to_message_id': str(message_id),
-                        'reply_markup': markup
+                        'reply_markup': markup,
+                        'parse_mode': 'HTML'
                     }
                 else:
                     payload = {
                         'chat_id': str(chat_id),
                         'text': msg,
-                        'reply_to_message_id': str(message_id)
+                        'reply_to_message_id': str(message_id),
+                        'parse_mode': 'HTML'
                     }
                 resp = telegramApi.sendMessage(payload)
             else:
@@ -262,12 +264,14 @@ class WebhookHandler(webapp2.RequestHandler):
                     payload = {
                         'chat_id': str(chat_id),
                         'text': msg,
-                        'reply_markup': markup
+                        'reply_markup': markup,
+                        'parse_mode': 'HTML'
                     }
                 else:
                     payload = {
                         'chat_id': str(chat_id),
-                        'text': msg
+                        'text': msg,
+                        'parse_mode': 'HTML'
                     }
                 resp = telegramApi.sendMessage(payload)
             else:
