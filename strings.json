@@ -15,10 +15,14 @@
   "use_keyboard": "Wake up your idea. Use the keyboard I gave you.",
   "member_msg_1": "Please choose your name from the following list:\n",
   "member_msg_2": "You entered the name {}.",
+  "member_msg_3": "Please choose your name again from the following list:\n",
   "member_keyboard_yes": "That's me",
   "member_keyboard_no": "I chose wrongly",
-  "set_pin": "You have not set a pin yet. Please set a pin at https://temptaking.ado.sg/group/",
-  "pin_keyboard": "Done",
+  "member_id_msg": "Your member ID is {}.",
+  "pin_msg": "Please enter your pin:",
+  "set_pin_1": "You have not set a pin yet. Please set a pin at https://temptaking.ado.sg/group/{}",
+  "set_pin_2": "Wake up your idea. You still have not set a pin yet.\nPlease set a pin at https://temptaking.ado.sg/group/{}",
+  "pin_keyboard": "I have a pin now",
   "invalid_pin": "Wake up your idea. This isn't a valid pin. A valid pin is in the form XXXX, where X is a number.\n\nPlease enter your pin again:",
   "wrong_pin": "You gave me the wrong pin. Wake up your idea and re-enter your pin:",
   "pin_keyboard_yes": "I'm absolutely sure that's correct",
@@ -33,6 +37,7 @@
   "invalid_input": "Wake up your idea. This is not a valid input.",
   "temp_submit_error": "An unknown error occurred while submitting your temperature. Please use the website to submit your temperature.",
   "setup_summary": "Here is a summary of the setup:",
+  "fatal_error": "A fatal error occurred. Please restart the setup by entering your temptaking URL:",
 
 
 

@@ -2,7 +2,7 @@ import requests
 import json
 from timeit import default_timer as timer
 
-url = "https://temptaking.ado.sg/group/540cb0a94ff617666b8041c364b8ca98"
+url = "https://temptaking.ado.sg/group/2c151e8ed996c62450f92383838af8a7"
 req = requests.get(url)
 req_text = str(req.content)
 
@@ -17,6 +17,8 @@ parsed_url = json.loads(urlParse(req_text))
 # print(json.dumps(parsed_url["members"]))
 
 group_members = json.loads(json.dumps(parsed_url["members"]))
+
+print(group_members)
 
 text = "Mr Teow"
 

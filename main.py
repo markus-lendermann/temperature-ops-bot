@@ -91,7 +91,7 @@ class WebsiteStatusHandler(webapp2.RequestHandler):
                     key_id = client.id()
                     payload = {
                         'chat_id': str(key_id),
-                        'text': strings["status _online"]
+                        'text': strings["status_online"]
                     }
                     telegramApi.sendMessage(payload)
         except:
@@ -209,6 +209,7 @@ def submitTemp(client, temp):
         }
         r = requests.post(url, data=payload)
     except:
+        # TODO: proper exception handling has to be done tbh
         return 'error'
     return r.json()
 
@@ -389,7 +390,7 @@ class WebhookHandler(webapp2.RequestHandler):
                 index = [obj["identifier"] for obj in gm].index(text)
                 client.memberId = gm[index]["id"]
                 client.memberName = gm[index]["identifier"]
-                client.pin = gm[index]["hasPin"]
+                client.pin = str(gm[index]["hasPin"])  # if this is False, ask the user to set a pin later
 
                 msg = strings["member_msg_2"].format(client.memberName)
                 markup = {
@@ -405,7 +406,7 @@ class WebhookHandler(webapp2.RequestHandler):
                 client.status = '4'
             except ValueError:
                 # user input does not match any identifier
-                msg = strings["use keyboard"]
+                msg = strings["use_keyboard"]
                 markup = {
                     "keyboard": [[item["identifier"]] for item in gm],
                     "one_time_keyboard": True
@@ -415,126 +416,111 @@ class WebhookHandler(webapp2.RequestHandler):
             return
 
         elif client.status == '4':
-            if text == strings["member keyboard yes"]:
-                message('Your member ID is ' + client.memberId + '.')
-                if client.pin == 'false':
-                    # TODO: actually re-check if the pin is now true on the website (only possible if user sets pin
-                    #  between having entered group url and now so realistically this isn't needed)
-                    form_fields = {
-                        'chat_id': str(chat_id),
-                        'text': strings["set pin"] + client.groupId + '.',
-                        'reply_markup': {
-                            "keyboard": [
-                                [
-                                    strings["pin keyboard"]
-                                ]
-                            ],
-                            "one_time_keyboard": True
-                        }
-                    }
-                    requests.post(BASE_URL + 'sendMessage', json=form_fields)
-                else:
-                    message('Please enter your pin:')
-                    client.status = '5'
-                    client.put()
-                return
-            elif text == strings["member keyboard no"]:
-                group_members = client.groupMembers
-                form_fields = {
-                    'chat_id': str(chat_id),
-                    'text': 'Please choose your name again from the following list:\n' + '\n'.join(
-                        [str(i + 1) + '.' + group_members[i].split(',')[1] for i in range(len(group_members))]),
-                    'reply_markup': {
-                        "keyboard": [[item.split(',')[1][1:]] for item in group_members],
+            if text == strings["member_keyboard_yes"]:
+                message(strings["member_id_msg"].format(client.memberId))
+                if client.pin == 'False':
+                    msg = strings["set_pin_1"].format(client.groupId)
+                    markup = {
+                        "keyboard": [
+                            [
+                                strings["pin_keyboard"]
+                            ]
+                        ],
                         "one_time_keyboard": True
                     }
+                    message(msg, markup)
+                    client.pin = 'no pin'
+                else:
+                    message(strings["pin_msg"])
+                    client.status = '5'
+                client.put()
+                return
+            elif text == strings["member_keyboard_no"]:
+                gm = json.loads(client.groupMembers)
+                name_list = '\n'.join([str(i + 1) + '. ' + gm[i]["identifier"] for i in range(len(gm))])
+                msg = strings["member_msg_3"] + name_list
+                markup = {
+                    "keyboard": [[item["identifier"]] for item in gm],
+                    "one_time_keyboard": True
                 }
-                requests.post(BASE_URL + 'sendMessage', json=form_fields)
+                message(msg, markup)
                 client.status = '3'
                 client.put()
                 return
-            elif text == strings["pin keyboard"]:  # triggered if user set pin after prompted to by bot
-                groupFlag = setGroupId(client, 'https://temptaking.ado.sg/group/' + client.groupId)
+            elif text == strings["pin_keyboard"]:  # triggered if user set pin after prompted to by bot
+                groupFlag = setGroupId(client, 'https://temptaking.ado.sg/group/{}'.format(client.groupId))
                 if groupFlag == 0:
-                    form_fields = {
-                        'chat_id': str(chat_id),
-                        'text': strings["status offline response"],
-                        'reply_markup': {
-                            "keyboard": [
-                                [
-                                    strings["pin keyboard"]
-                                ]
-                            ],
-                            "one_time_keyboard": True
-                        }
+                    msg = strings["status_offline_response"]
+                    markup = {
+                        "keyboard": [
+                            [
+                                strings["pin_keyboard"]
+                            ]
+                        ],
+                        "one_time_keyboard": True
                     }
-                    requests.post(BASE_URL + 'sendMessage', json=form_fields)
+                    message(msg, markup)
                 else:
-                    group_members = client.groupMembers
-                    for item in group_members:
-                        member_id = item.split(',')[0]
-                        member_name = item.split(',')[1][1:]
-                        pin = item.split(',')[2][1:]
-                        if member_name == client.memberName:
-                            client.memberId = member_id
-                            client.memberName = member_name
-                            client.pin = pin
-                    if client.pin == 'false':
-                        # TODO: actually re-check if the pin is now true on the website
-                        form_fields = {
-                            'chat_id': str(chat_id),
-                            'text': 'Wake up your idea. ' + strings["set pin"] + client.groupId + '.',
-                            'reply_markup': {
+                    # check that hasPin is now True
+                    gm = json.loads(client.groupMembers)
+                    try:
+                        index = [obj["identifier"] for obj in gm].index(client.memberName)  # if this throws an 
+                        # exception, it means the user has changed their name and is probably trying to break the bot
+                        client.memberId = gm[index]["id"]
+                        client.memberName = gm[index]["identifier"]
+                        client.pin = str(gm[index]["hasPin"])  # this should be true now
+
+                        if client.pin == 'False':
+                            msg = strings["set_pin_2"].format(client.groupId)
+                            markup = {
                                 "keyboard": [
                                     [
-                                        strings["pin keyboard"]
+                                        strings["pin_keyboard"]
                                     ]
                                 ],
                                 "one_time_keyboard": True
                             }
-                        }
-                        requests.post(BASE_URL + 'sendMessage', json=form_fields)
-                    else:
-                        message('Please enter your pin:')
-                        client.status = '5'
+                            message(msg, markup)
+                            client.pin = 'no pin'
+                        else:
+                            message(strings["pin_msg"])
+                            client.status = '5'
+                        client.put()
+                    except ValueError:
+                        # user is probably trying to break the bot
+                        message(strings["fatal_error"])
+                        client.status = '1'
+                        client.temp = 'init'
                         client.put()
                     return
             else:
-                if client.pin == 'false':
-                    form_fields = {
-                        'chat_id': str(chat_id),
-                        'text': strings["use keyboard"],
-                        'reply_markup': {
-                            "keyboard": [
-                                [
-                                    strings["pin keyboard"]
-                                ]
-                            ],
-                            "one_time_keyboard": True
-                        }
+                msg = strings["use_keyboard"]
+                if client.pin == 'no pin':
+                    markup = {
+                        "keyboard": [
+                            [
+                                strings["pin_keyboard"]
+                            ]
+                        ],
+                        "one_time_keyboard": True
                     }
-                    requests.post(BASE_URL + 'sendMessage', json=form_fields)
                 else:
-                    form_fields = {
-                        'chat_id': str(chat_id),
-                        'text': 'Wake up your idea. Use the keyboard I gave you.',
-                        'reply_markup': {
-                            "keyboard": [
-                                [
-                                    strings["member keyboard yes"],
-                                    strings["member keyboard no"]
-                                ]
-                            ],
-                            "one_time_keyboard": True
-                        }
+                    markup = {
+                        "keyboard": [
+                            [
+                                strings["member_keyboard_yes"],
+                                strings["member_keyboard_no"]
+                            ]
+                        ],
+                        "one_time_keyboard": True
                     }
-                    requests.post(BASE_URL + 'sendMessage', json=form_fields)
+                message(msg, markup)
                 return
 
         elif client.status == '5':
             p = re.compile(r'\d{4}$').match(text)
             if p is None:
-                reply(strings["invalid pin"])
+                reply(strings["invalid_pin"])
             else:
                 form_fields = {
                     'chat_id': str(chat_id),
@@ -542,8 +528,8 @@ class WebhookHandler(webapp2.RequestHandler):
                     'reply_markup': {
                         "keyboard": [
                             [
-                                strings["pin keyboard yes"],
-                                strings["pin keyboard no"]
+                                strings["pin_keyboard_yes"],
+                                strings["pin_keyboard_no"]
                             ]
                         ],
                         "one_time_keyboard": True
@@ -556,7 +542,7 @@ class WebhookHandler(webapp2.RequestHandler):
             return
 
         elif client.status == '6':
-            if text == strings["pin keyboard yes"]:
+            if text == strings["pin_keyboard_yes"]:
                 message('Your confirmed pin is ' + client.pin + '.')
                 form_fields = {
                     'chat_id': str(chat_id),
@@ -566,8 +552,8 @@ class WebhookHandler(webapp2.RequestHandler):
                     'reply_markup': {
                         "keyboard": [
                             [
-                                strings["summary keyboard yes"],
-                                strings["summary keyboard no"]
+                                strings["summary_keyboard_yes"],
+                                strings["summary_keyboard_no"]
                             ]
                         ],
                         "one_time_keyboard": True
@@ -577,7 +563,7 @@ class WebhookHandler(webapp2.RequestHandler):
                 client.status = 'endgame 1'
                 client.put()
                 return
-            elif text == strings["pin keyboard no"]:
+            elif text == strings["pin_keyboard_no"]:
                 message('Please enter your pin again:')
                 client.status = '5'
                 client.put()
@@ -585,12 +571,12 @@ class WebhookHandler(webapp2.RequestHandler):
             else:
                 form_fields = {
                     'chat_id': str(chat_id),
-                    'text': strings["use keyboard"],
+                    'text': strings["use_keyboard"],
                     'reply_markup': {
                         "keyboard": [
                             [
-                                strings["pin keyboard yes"],
-                                strings["pin keyboard no"]
+                                strings["pin_keyboard_yes"],
+                                strings["pin_keyboard_no"]
                             ]
                         ],
                         "one_time_keyboard": True
@@ -601,7 +587,7 @@ class WebhookHandler(webapp2.RequestHandler):
 
         elif client.status == 'endgame 1':
             now = datetime.now() + timedelta(hours=8)
-            if text == strings["summary keyboard no"]:
+            if text == strings["summary_keyboard_no"]:
                 message(strings["SAF100"])
                 client.status = '1'
                 client.temp = 'init'
@@ -609,17 +595,17 @@ class WebhookHandler(webapp2.RequestHandler):
                 return
             if client.temp == 'init':
                 if now.hour < 12:
-                    message(now.strftime("It's now %H:%M on %A, %d/%m/%y. ") + strings["new user AM"])
+                    message(now.strftime("It's now %H:%M on %A, %d/%m/%y. ") + strings["new_user_AM"])
                 else:
-                    message(now.strftime("It's now %H:%M on %A, %d/%m/%y. ") + strings["new user PM"])
+                    message(now.strftime("It's now %H:%M on %A, %d/%m/%y. ") + strings["new_user_PM"])
                 return
             else:
                 if now.hour < 12:
                     message('You have already submitted a temperature of ' + client.temp + u'\u00b0' + now.strftime(
-                        'C for %A, %d/%m/%y, AM window. ') + strings["old user AM"])
+                        'C for %A, %d/%m/%y, AM window. ') + strings["old_user_AM"])
                 else:
                     message('You have already submitted a temperature of ' + client.temp + u'\u00b0' + now.strftime(
-                        'C for %A, %d/%m/%y, PM window. ') + strings["old user PM"])
+                        'C for %A, %d/%m/%y, PM window. ') + strings["old_user_PM"])
             return
 
         elif client.status == 'endgame 2':
@@ -628,7 +614,7 @@ class WebhookHandler(webapp2.RequestHandler):
                 temperatures = [[str(x / 10), str((x + 1) / 10)] for x in range(355, 375, 2)]
                 form_fields = {
                     'chat_id': str(chat_id),
-                    'text': strings["invalid temp"] + '\n\n' + strings["select temp"],
+                    'text': strings["invalid_temp"] + '\n\n' + strings["select_temp"],
                     'reply_markup': {
                         "keyboard": temperatures,
                         "one_time_keyboard": True
@@ -657,24 +643,24 @@ class WebhookHandler(webapp2.RequestHandler):
                         now = datetime.now() + timedelta(hours=8)
                         if now.hour < 12:
                             message('I have submitted a temperature of ' + client.temp + u'\u00b0' + 'C' + now.strftime(
-                                ' at %H:%M under the AM window for %A, %d/%m/%y.\n\n') + strings["old user AM"])
+                                ' at %H:%M under the AM window for %A, %d/%m/%y.\n\n') + strings["old_user_AM"])
                         else:
                             message('I have submitted a temperature of ' + client.temp + u'\u00b0' + 'C' + now.strftime(
-                                ' at %H:%M under the PM window for %A, %d/%m/%y.\n\n') + strings["old user PM"])
+                                ' at %H:%M under the PM window for %A, %d/%m/%y.\n\n') + strings["old_user_PM"])
                         client.status = 'endgame 1'
                         client.put()
                     elif resp == 'Wrong pin.':
-                        message(strings["wrong pin"])
+                        message(strings["wrong_pin"])
                         client.status = 'wrong pin'
                         client.temp = 'error'
                         client.put()
                     else:
-                        message(strings["temp submit error"])
+                        message(strings["temp_submit_error"])
                 return
         elif client.status == 'wrong pin':
             p = re.compile(r'\d{4}$').match(text)
             if p is None:
-                reply(strings["invalid pin"])
+                reply(strings["invalid_pin"])
             else:
                 form_fields = {
                     'chat_id': str(chat_id),
@@ -683,7 +669,7 @@ class WebhookHandler(webapp2.RequestHandler):
                         "keyboard": [
                             [
                                 "Re-submit my temperature now",
-                                strings["pin keyboard no"]
+                                strings["pin_keyboard_no"]
                             ]
                         ],
                         "one_time_keyboard": True
@@ -699,7 +685,7 @@ class WebhookHandler(webapp2.RequestHandler):
                 temperatures = [[str(x / 10), str((x + 1) / 10)] for x in range(355, 375, 2)]
                 form_fields = {
                     'chat_id': str(chat_id),
-                    'text': strings["select temp"],
+                    'text': strings["select_temp"],
                     'reply_markup': {
                         "keyboard": temperatures,
                         "one_time_keyboard": True
@@ -709,7 +695,7 @@ class WebhookHandler(webapp2.RequestHandler):
                 client.status = 'endgame 2'
                 client.put()
                 return
-            elif text == strings["pin keyboard no"]:
+            elif text == strings["pin_keyboard_no"]:
                 message('Please enter your pin again:')
                 client.status = 'wrong pin'
                 client.put()
@@ -717,12 +703,12 @@ class WebhookHandler(webapp2.RequestHandler):
             else:
                 form_fields = {
                     'chat_id': str(chat_id),
-                    'text': strings["use keyboard"],
+                    'text': strings["use_keyboard"],
                     'reply_markup': {
                         "keyboard": [
                             [
-                                strings["pin keyboard yes"],
-                                strings["pin keyboard no"]
+                                strings["pin_keyboard_yes"],
+                                strings["pin_keyboard_no"]
                             ]
                         ],
                         "one_time_keyboard": True
@@ -731,7 +717,7 @@ class WebhookHandler(webapp2.RequestHandler):
                 requests.post(BASE_URL + 'sendMessage', json=form_fields)
                 return
         else:
-            reply(strings["invalid input"])
+            reply(strings["invalid_input"])
             return
 
 
