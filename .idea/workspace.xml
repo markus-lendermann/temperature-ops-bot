@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="09fab2e2-bcb4-4c44-8aa4-9ec3b4c7ea10" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/strings.json" beforeDir="false" afterPath="$PROJECT_DIR$/strings.json" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1YZvRcB49ELNySR0TNWnkwu9DDE" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/test.py" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Markus\PycharmProjects\telebot-master" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="temperature-ops-bot" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="09fab2e2-bcb4-4c44-8aa4-9ec3b4c7ea10" name="Default Changelist" comment="" />
+      <created>1583162923124</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1583162923124</updated>
+    </task>
+    <task id="LOCAL-00001" summary="fixed">
+      <created>1586326381427</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1586326381427</updated>
+    </task>
+    <task id="LOCAL-00002" summary="stuff">
+      <created>1586328168211</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1586328168212</updated>
+    </task>
+    <task id="LOCAL-00003" summary="stuff">
+      <created>1586515910646</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1586515910646</updated>
+    </task>
+    <task id="LOCAL-00004" summary="started implementing strings.json">
+      <created>1586526511490</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1586526511490</updated>
+    </task>
+    <task id="LOCAL-00005" summary="implementing string.json">
+      <created>1586527965334</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1586527965334</updated>
+    </task>
+    <task id="LOCAL-00006" summary="implementing string.json">
+      <created>1586528202889</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1586528202889</updated>
+    </task>
+    <task id="LOCAL-00007" summary="implementing string.json">
+      <created>1586532030565</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1586532030565</updated>
+    </task>
+    <task id="LOCAL-00008" summary="implementing string.json">
+      <created>1586533057159</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1586533057159</updated>
+    </task>
+    <task id="LOCAL-00009" summary="refactoring a bit">
+      <created>1586860826553</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1586860826553</updated>
+    </task>
+    <task id="LOCAL-00010" summary="refactoring a bit">
+      <created>1586873755234</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1586873755234</updated>
+    </task>
+    <task id="LOCAL-00011" summary="refactoring a bit">
+      <created>1586949904907</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1586949904907</updated>
+    </task>
+    <task id="LOCAL-00012" summary="refactoring a bit">
+      <created>1587015357423</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1587015357423</updated>
+    </task>
+    <task id="LOCAL-00013" summary="refactoring a bit">
+      <created>1587020636603</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1587020636603</updated>
+    </task>
+    <task id="LOCAL-00014" summary="refactoring a bit">
+      <created>1587026431421</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1587026431421</updated>
+    </task>
+    <task id="LOCAL-00015" summary="refactoring a bit">
+      <created>1587026528845</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1587026528845</updated>
+    </task>
+    <task id="LOCAL-00016" summary="refactoring a bit">
+      <created>1587028090611</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1587028090611</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
+    <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_NEW_TODO" value="false" />
+    <MESSAGE value="fixed" />
+    <MESSAGE value="stuff" />
+    <MESSAGE value="started implementing strings.json" />
+    <MESSAGE value="implementing string.json" />
+    <MESSAGE value="refactoring a bit" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactoring a bit" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="144" y="0" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1587014989546">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="96" y="0" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1280.680@0.0.1280.680" timestamp="1586325103148" />
+    <state x="144" y="0" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1587014989546" />
+    <state x="637" y="70" key="CommitChangelistDialog2" timestamp="1587028090197">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="293" y="0" key="CommitChangelistDialog2/0.0.1280.680@0.0.1280.680" timestamp="1586949903575" />
+    <state x="637" y="70" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1587028090197" />
+    <state x="686" y="243" key="FileChooserDialogImpl" timestamp="1587014694444">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="458" y="159" key="FileChooserDialogImpl/0.0.1280.680@0.0.1280.680" timestamp="1587012404495" />
+    <state x="549" y="215" key="FileChooserDialogImpl/0.0.1536.920@0.0.1536.920" timestamp="1586131993614" />
+    <state x="686" y="243" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1587014694444" />
+    <state width="1899" height="202" key="GridCell.Tab.0.bottom" timestamp="1587026212657">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="202" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1587026212657" />
+    <state width="1899" height="202" key="GridCell.Tab.0.center" timestamp="1587026212657">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="202" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1587026212657" />
+    <state width="1899" height="202" key="GridCell.Tab.0.left" timestamp="1587026212657">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="202" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1587026212657" />
+    <state width="1899" height="202" key="GridCell.Tab.0.right" timestamp="1587026212657">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="202" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1587026212657" />
+    <state x="759" y="231" key="RollbackChangesDialog" timestamp="1586596050550">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="759" y="231" key="RollbackChangesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1586596050550" />
+    <state x="347" y="0" key="SettingsEditor" timestamp="1587014814895">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="231" y="0" key="SettingsEditor/0.0.1280.680@0.0.1280.680" timestamp="1586949754674" />
+    <state x="277" y="103" key="SettingsEditor/0.0.1536.920@0.0.1536.920" timestamp="1583163159025" />
+    <state x="347" y="0" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1587014814895" />
+    <state x="769" y="437" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1586596042238">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="769" y="437" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1586596042238" />
+    <state x="431" y="195" width="672" height="678" key="search.everywhere.popup" timestamp="1583449645634">
+      <screen x="0" y="0" width="1536" height="920" />
+    </state>
+    <state x="431" y="195" width="672" height="678" key="search.everywhere.popup/0.0.1536.920@0.0.1536.920" timestamp="1583449645634" />
+  </component>
+</project>
