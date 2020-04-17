@@ -609,11 +609,11 @@ def webhook():
             else:
                 if now.hour < 12:
                     message((now.strftime(
-                        strings["already_submitted_AM"]).decode("utf-8").format(client.temp, u'\u00b0')
+                        strings["already_submitted_AM"]).format(client.temp, u'\u00b0')
                              + strings["old_user_AM"]))
                 else:
                     message((now.strftime(
-                        strings["already_submitted_PM"]).decode("utf-8").format(client.temp, u'\u00b0')
+                        strings["already_submitted_PM"]).format(client.temp, u'\u00b0')
                              + strings["old_user_PM"]))
             return response
 
@@ -631,7 +631,7 @@ def webhook():
                 temp = float(text)
                 if temp >= 40.05 or temp <= 34.95:
                     temperatures = generateTemperatures()
-                    msg = strings["temp_outside_range"].decode("utf-8").format(deg=u'\u00b0')
+                    msg = strings["temp_outside_range"].format(deg=u'\u00b0')
                     markup = {
                         "keyboard": temperatures,
                         "one_time_keyboard": True
@@ -644,11 +644,11 @@ def webhook():
                         now = datetime.now() + timedelta(hours=8)
                         if now.hour < 12:
                             message((now.strftime(
-                                strings["just_submitted_AM"]).decode("utf-8").format(client.temp, u'\u00b0')
+                                strings["just_submitted_AM"]).format(client.temp, u'\u00b0')
                                      + strings["old_user_AM"]))
                         else:
                             message((now.strftime(
-                                strings["just_submitted_PM"]).decode("utf-8").format(client.temp, u'\u00b0')
+                                strings["just_submitted_PM"]).format(client.temp, u'\u00b0')
                                      + strings["old_user_PM"]))
                         client.status = 'endgame 1'
                         client.groupMembers  # flush datastore
