@@ -1,7 +1,7 @@
 cron:
-#- description: "hourly reminder"
-#  url: /remind
-#  schedule: every 1 hours from 00:01 to 23:01
-#- description: "test website"
-#  url: /website_status
-#  schedule: every 1 minutes
+- description: "hourly reminder"
+  url: /remind
+  schedule: every 1 hours from 00:01 to 23:01
+- description: "test website"
+  url: /website_status
+  schedule: every 1 minutes

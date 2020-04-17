@@ -565,6 +565,7 @@ class WebhookHandler(webapp2.RequestHandler):
                 }
                 message(msg, markup)
                 client.status = 'endgame 1'
+                client.groupMembers = ''  # flush datastore
                 client.put()
                 return
             elif text == strings["pin_keyboard_no"]:
@@ -646,6 +647,7 @@ class WebhookHandler(webapp2.RequestHandler):
                                 strings["just_submitted_PM"]).decode("utf-8").format(client.temp, u'\u00b0')
                                      + strings["old_user_PM"]))
                         client.status = 'endgame 1'
+                        client.groupMembers  # flush datastore
                         client.put()
                     elif resp == 'Wrong pin.':
                         message(strings["wrong_pin"])
