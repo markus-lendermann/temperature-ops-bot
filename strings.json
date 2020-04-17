@@ -6,7 +6,7 @@
   "window_open_PM": "It's now %H:%M on %A, %d/%m/%y. You are eligible for PM submission.\n\nPlease select your current temperature below, or type it in if it is not shown.",
   "select_temp": "Please select your current temperature below, or type it in if it is not shown.",
   "no_text_error": "This isn't a text message. Wake up your idea.",
-  "SAF100": "<b>You have been ° mobilised for Temperature Monitoring Ops.</b>\nPlease enter your temptaking URL:",
+  "SAF100": "<b>You have been mobilised for Temperature Monitoring Ops.</b>\nPlease enter your temptaking URL:",
   "SAF100_2": "Please enter your temptaking URL again:",
   "group_msg": "The name of your group is {}",
   "group_keyboard_yes": "That's correct",

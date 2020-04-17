@@ -64,6 +64,10 @@ else:
     wstatus = wstatus[0]
 
 
+def generateTemperatures():
+    return [[str(x / 10), str((x + 1) / 10)] for x in range(355, 375, 2)]
+
+
 class MeHandler(webapp2.RequestHandler):
     def get(self):
         resp = telegramApi.getMe()
@@ -299,9 +303,6 @@ class WebhookHandler(webapp2.RequestHandler):
         if not wstatus.status:
             message(strings["status_offline_response"])
             return
-
-        def generateTemperatures():
-            return [[str(x / 10), str((x + 1) / 10)] for x in range(355, 375, 2)]
 
         if text.startswith('/'):
             if text == '/start':
