@@ -111,7 +111,6 @@ class WebsiteStatusHandler(webapp2.RequestHandler):
 
 class ReminderHandler(webapp2.RequestHandler):
     def get(self):
-        urlfetch.set_default_fetch_deadline(60)
         if len(WebsiteStatus.query().fetch()) == 0:
             wstatus = WebsiteStatus.get_or_insert('status')
             wstatus.status = True  # if status object doesn't exist yet, initialize as true
@@ -158,6 +157,7 @@ class BroadcastHandler(webapp2.RequestHandler):
             payload = {
                 'chat_id': str(key_id),
                 'text': self.request.get('msg'),
+                'parse_mode': 'HTML'
             }
             telegramApi.sendMessage(payload)
         self.response.write('broadcast sent to ' + str(len(all_clients)) + ' clients')

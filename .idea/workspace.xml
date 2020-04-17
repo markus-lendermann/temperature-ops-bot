@@ -19,7 +19,7 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="09fab2e2-bcb4-4c44-8aa4-9ec3b4c7ea10" name="Default Changelist" comment="">
+    <list default="true" id="09fab2e2-bcb4-4c44-8aa4-9ec3b4c7ea10" name="Default Changelist" comment="property indexing">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -246,7 +246,14 @@
       <option name="project" value="LOCAL" />
       <updated>1587105952354</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="property indexing">
+      <created>1587107427310</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1587107427310</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -272,7 +279,8 @@
     <MESSAGE value="strings.json updates" />
     <MESSAGE value="HTML formatting" />
     <MESSAGE value="finished refactoring (single-thread)" />
-    <option name="LAST_COMMIT_MESSAGE" value="finished refactoring (single-thread)" />
+    <MESSAGE value="property indexing" />
+    <option name="LAST_COMMIT_MESSAGE" value="property indexing" />
   </component>
   <component name="WindowStateProjectService">
     <state x="144" y="0" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1587014989546">
@@ -280,11 +288,11 @@
     </state>
     <state x="96" y="0" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1280.680@0.0.1280.680" timestamp="1586325103148" />
     <state x="144" y="0" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1587014989546" />
-    <state x="637" y="70" key="CommitChangelistDialog2" timestamp="1587105951871">
+    <state x="637" y="70" key="CommitChangelistDialog2" timestamp="1587111160679">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="293" y="0" key="CommitChangelistDialog2/0.0.1280.680@0.0.1280.680" timestamp="1586949903575" />
-    <state x="637" y="70" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1587105951871" />
+    <state x="637" y="70" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1587111160679" />
     <state x="686" y="243" key="FileChooserDialogImpl" timestamp="1587030874011">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
