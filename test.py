@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 
 def loadStrings():
-    with open("strings.json") as tf:
+    with open("strings.json", encoding="utf-8") as tf:
         strings = json.load(tf)
 
     return strings
@@ -15,13 +15,14 @@ now = datetime.now()
 
 msg = "<i>Setup Summary</i>\nGroup name: <b>{}</b>\nMember name: <b>{}</b>\nMember ID: <b>{}</b>\nPin: <b>{}</b>".format("TCRM Temperature OPS", "Markus", "123456", "0000")
 
-msg = now.strftime(strings["SAF100"]).format()
+msg = strings["SAF100"]
 
 
-url = 'https://tempbotv2.ey.r.appspot.com/broadcast?msg=' + msg
+url = 'https://tempbotv2.ey.r.appspot.com/broadcast'
+payload = {
+    "msg": msg
+}
 
 
-r = requests.get(url)
+r = requests.post(url, json=payload)
 print(r.text)
-
-print("°".encode("utf-8"))

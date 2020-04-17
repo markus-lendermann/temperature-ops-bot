@@ -31,7 +31,7 @@ def loadStrings():
 
 
 class WebsiteStatus(ndb.Model):
-    status = ndb.BooleanProperty(default=True, indexed=False)
+    status = ndb.BooleanProperty(default=True)
 
 
 class Client(ndb.Model):
@@ -53,15 +53,10 @@ tokens = loadTokens()
 strings = loadStrings()
 telegramApi = TelegramApiWrapper(tokens["telegram-bot"])
 
+#  this context will be used for the entire app instance
 ndb_client = ndb.Client()
 with ndb_client.context():
-    wstatus = WebsiteStatus.query().fetch()
-    if len(wstatus) == 0:
-        wstatus = WebsiteStatus.get_or_insert('status')
-        wstatus.status = True  # if status object doesn't exist yet, initialize as true
-        wstatus.put()
-    else:
-        wstatus = wstatus[0]
+    wstatus = WebsiteStatus.get_or_insert('status')
 
 
 def generateTemperatures():
@@ -91,13 +86,13 @@ def submitTemp(client, temp):
     return r.text
 
 
-@app.route('/me', methods=["POST"])
+@app.route('/me')
 def getMe():
     resp = telegramApi.getMe()
     return resp["result"]
 
 
-@app.route('/setWebhook', methods=["POST"])
+@app.route('/setWebhook')
 def getWebhook():
     url = tokens["project-url"] + "webhook"
     resp = telegramApi.setWebhook(url)
@@ -107,11 +102,10 @@ def getWebhook():
         return "webhook failed to set. DEBUG: " + str(resp)
 
 
-@app.route('/websiteStatus', methods=["POST"])
+@app.route('/websiteStatus')
 def websiteStatus():
-    ndb_client = ndb.Client()
     with ndb_client.context():
-        wstatus = WebsiteStatus.get_or_insert('status')[0]
+        wstatus = WebsiteStatus.get_or_insert('status')
         try:
             requests.get("https://temptaking.ado.sg")
             if not wstatus.status:
@@ -140,17 +134,10 @@ def websiteStatus():
         return 'ok'
 
 
-@app.route('/remind', methods=["POST"])
+@app.route('/remind')
 def remind():
-    ndb_client = ndb.Client()
     with ndb_client.context():
-        if len(WebsiteStatus.query().fetch()) == 0:
-            wstatus = WebsiteStatus.get_or_insert('status')
-            wstatus.status = True  # if status object doesn't exist yet, initialize as true
-            wstatus.put()
-        else:
-            wstatus = WebsiteStatus.query().fetch()
-            wstatus = wstatus[0]
+        wstatus = WebsiteStatus.get_or_insert('status')
         all_clients = Client.query().fetch(keys_only=True)
         for i in range(len(all_clients)):
             client = all_clients[i]
@@ -179,12 +166,11 @@ def remind():
                     telegramApi.sendMessage(payload)
                     client.status = 'endgame 2'
             client.put()
-        return 'ok'
+            return 'ok'
 
 
 @app.route('/broadcast', methods=["POST"])
 def broadcast():
-    ndb_client = ndb.Client()
     with ndb_client.context():
         all_clients = Client.query().fetch(keys_only=True)
         for client in all_clients:
@@ -200,7 +186,6 @@ def broadcast():
 
 @app.route('/webhook', methods=["POST"])
 def webhook():
-    ndb_client = ndb.Client()
     with ndb_client.context():
         body = request.get_json()
         logging.info('request body:')
@@ -297,14 +282,7 @@ def webhook():
             return response
 
         # force check website status before proceeding
-        wstatus = WebsiteStatus.query().fetch()
-        if len(wstatus) == 0:
-            # initialize wstatus object if not already done previously
-            wstatus = WebsiteStatus.get_or_insert('status')
-            wstatus.status = True
-            wstatus.put()
-        else:
-            wstatus = wstatus[0]
+        wstatus = WebsiteStatus.get_or_insert('status')
         if not wstatus.status:
             message(strings["status_offline_response"])
             return response
