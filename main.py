@@ -1,22 +1,20 @@
-from __future__ import division
 from api_wrapper import TelegramApiWrapper
+from flask import Flask, request
 import json
 import logging
-import urllib
-import urllib2
+import lib.requests as requests
 import re
 from datetime import datetime, timedelta
-# standard app engine imports
-from google.appengine.api import urlfetch
-from google.appengine.ext import ndb
-import webapp2
-import requests
-import requests_toolbelt.adapters.appengine
-import Queue as queue
+from google.cloud import ndb
 
-requests_toolbelt.adapters.appengine.monkeypatch()
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(levelname)-8s :: (%(name)s) > %(message)s'
+)
 
 
+# load private API tokens from file
 def loadTokens():
     with open("tokens.json") as tf:
         tokens = json.load(tf)
@@ -24,6 +22,7 @@ def loadTokens():
     return tokens
 
 
+# load strings from file
 def loadStrings():
     with open("strings.json") as tf:
         strings = json.load(tf)
@@ -40,53 +39,78 @@ class Client(ndb.Model):
     status = ndb.StringProperty(default='0')
     groupId = ndb.StringProperty()
     groupName = ndb.StringProperty()
-    groupMembers = ndb.StringProperty(indexed=False)
+    groupMembers = ndb.TextProperty()
     memberName = ndb.StringProperty()
     memberId = ndb.StringProperty()
     pin = ndb.StringProperty()
     temp = ndb.StringProperty()
 
 
+app = Flask(__name__)
+logger = logging.getLogger(__name__)
+
 tokens = loadTokens()
 strings = loadStrings()
-test = queue.Queue()
-
-
 telegramApi = TelegramApiWrapper(tokens["telegram-bot"])
-BASE_URL = 'https://api.telegram.org/bot' + tokens["telegram-bot"] + '/'
 
-wstatus = WebsiteStatus.query().fetch()
-if len(wstatus) == 0:
-    wstatus = WebsiteStatus.get_or_insert('status')
-    wstatus.status = True  # if status object doesn't exist yet, initialize as true
-    wstatus.put()
-else:
-    wstatus = wstatus[0]
+ndb_client = ndb.Client()
+with ndb_client.context():
+    wstatus = WebsiteStatus.query().fetch()
+    if len(wstatus) == 0:
+        wstatus = WebsiteStatus.get_or_insert('status')
+        wstatus.status = True  # if status object doesn't exist yet, initialize as true
+        wstatus.put()
+    else:
+        wstatus = wstatus[0]
 
 
 def generateTemperatures():
     return [[str(x / 10), str((x + 1) / 10)] for x in range(355, 375, 2)]
 
 
-class MeHandler(webapp2.RequestHandler):
-    def get(self):
-        resp = telegramApi.getMe()
-        self.response.write(resp["result"])
+def submitTemp(client, temp):
+    now = datetime.now() + timedelta(hours=8)
+    if now.hour < 12:
+        meridies = 'AM'
+    else:
+        meridies = 'PM'
+    try:
+        url = 'https://temptaking.ado.sg/group/MemberSubmitTemperature'
+        payload = {
+            'groupCode': client.groupId,
+            'date': now.strftime('%d/%m/%Y'),
+            'meridies': meridies,
+            'memberId': client.memberId,
+            'temperature': temp,
+            'pin': client.pin
+        }
+        r = requests.post(url, data=payload)
+    except:
+        # TODO: proper exception handling has to be done tbh
+        return 'error'
+    return r.text
 
 
-class SetWebhookHandler(webapp2.RequestHandler):
-    def get(self):
-        url = tokens["project-url"] + "webhook"
-        resp = telegramApi.setWebhook(url)
-        if resp["ok"]:
-            self.response.write("webhook has been set to " + url)
-        else:
-            self.response.write("webhook failed to set. DEBUG: ")
-            self.response.write(str(resp))
+@app.route('/me', methods=["POST"])
+def getMe():
+    resp = telegramApi.getMe()
+    return resp["result"]
 
 
-class WebsiteStatusHandler(webapp2.RequestHandler):
-    def get(self):
+@app.route('/setWebhook', methods=["POST"])
+def getWebhook():
+    url = tokens["project-url"] + "webhook"
+    resp = telegramApi.setWebhook(url)
+    if resp["ok"]:
+        return "webhook has been set to " + url
+    else:
+        return "webhook failed to set. DEBUG: " + str(resp)
+
+
+@app.route('/websiteStatus', methods=["POST"])
+def websiteStatus():
+    ndb_client = ndb.Client()
+    with ndb_client.context():
         wstatus = WebsiteStatus.get_or_insert('status')[0]
         try:
             requests.get("https://temptaking.ado.sg")
@@ -113,11 +137,13 @@ class WebsiteStatusHandler(webapp2.RequestHandler):
                         'text': strings["status_offline"]
                     }
                     telegramApi.sendMessage(payload)
-        self.response.write('ok')
+        return 'ok'
 
 
-class ReminderHandler(webapp2.RequestHandler):
-    def get(self):
+@app.route('/remind', methods=["POST"])
+def remind():
+    ndb_client = ndb.Client()
+    with ndb_client.context():
         if len(WebsiteStatus.query().fetch()) == 0:
             wstatus = WebsiteStatus.get_or_insert('status')
             wstatus.status = True  # if status object doesn't exist yet, initialize as true
@@ -153,78 +179,33 @@ class ReminderHandler(webapp2.RequestHandler):
                     telegramApi.sendMessage(payload)
                     client.status = 'endgame 2'
             client.put()
-        self.response.write('ok')
+        return 'ok'
 
 
-class BroadcastHandler(webapp2.RequestHandler):
-    def get(self):
+@app.route('/broadcast', methods=["POST"])
+def broadcast():
+    ndb_client = ndb.Client()
+    with ndb_client.context():
         all_clients = Client.query().fetch(keys_only=True)
         for client in all_clients:
             key_id = client.id()
             payload = {
                 'chat_id': str(key_id),
-                'text': self.request.get('msg'),
+                'text': request.get_json()['msg'],
                 'parse_mode': 'HTML'
             }
             telegramApi.sendMessage(payload)
-        self.response.write('broadcast sent to ' + str(len(all_clients)) + ' clients')
+        return 'broadcast sent to ' + str(len(all_clients)) + ' clients'
 
 
-def setGroupId(client, group_url):
-    group_string = 'temptaking.ado.sg/group'
-    if group_url.startswith(group_string):
-        group_url = 'https://' + group_url
-    if group_url.startswith('https://' + group_string) or group_url.startswith('http://' + group_string):
-        try:
-            req_text = str(requests.get(group_url).content)
-        except:
-            return 0
-        if 'Invalid code' in req_text:
-            return -1
-
-        def urlParse(text):
-            return text[text.find('{'):text.rfind('}') + 1]
-
-        parsed_url = json.loads(urlParse(req_text))
-        client.groupName = parsed_url["groupName"]
-        client.groupId = parsed_url["groupCode"]
-        client.groupMembers = json.dumps(parsed_url["members"])
-        client.put()
-        return 1
-    else:
-        return -1
-
-
-def submitTemp(client, temp):
-    now = datetime.now() + timedelta(hours=8)
-    if now.hour < 12:
-        meridies = 'AM'
-    else:
-        meridies = 'PM'
-    try:
-        url = 'https://temptaking.ado.sg/group/MemberSubmitTemperature'
-        payload = {
-            'groupCode': client.groupId,
-            'date': now.strftime('%d/%m/%Y'),
-            'meridies': meridies,
-            'memberId': client.memberId,
-            'temperature': temp,
-            'pin': client.pin
-        }
-        r = requests.post(url, data=payload)
-    except:
-        # TODO: proper exception handling has to be done tbh
-        return 'error'
-    return r.text
-
-
-class WebhookHandler(webapp2.RequestHandler):
-    def post(self):
-        urlfetch.set_default_fetch_deadline(60)
-        body = json.loads(self.request.body)
+@app.route('/webhook', methods=["POST"])
+def webhook():
+    ndb_client = ndb.Client()
+    with ndb_client.context():
+        body = request.get_json()
         logging.info('request body:')
         logging.info(body)
-        self.response.write(json.dumps(body))
+        response = json.dumps(body)
 
         update_id = body['update_id']
         try:
@@ -287,9 +268,33 @@ class WebhookHandler(webapp2.RequestHandler):
             logging.info('send response:')
             logging.info(resp)
 
+        def setGroupId(client, group_url):
+            group_string = 'temptaking.ado.sg/group'
+            if group_url.startswith(group_string):
+                group_url = 'https://' + group_url
+            if group_url.startswith('https://' + group_string) or group_url.startswith('http://' + group_string):
+                try:
+                    req_text = str(requests.get(group_url).content)
+                except:
+                    return 0
+                if 'Invalid code' in req_text:
+                    return -1
+
+                def urlParse(text):
+                    return text[text.find('{'):text.rfind('}') + 1]
+
+                parsed_url = json.loads(urlParse(req_text))
+                client.groupName = parsed_url["groupName"]
+                client.groupId = parsed_url["groupCode"]
+                client.groupMembers = json.dumps(parsed_url["members"])
+                client.put()
+                return 1
+            else:
+                return -1
+
         if text is None:
             reply(strings["no_text_error"])
-            return
+            return response
 
         # force check website status before proceeding
         wstatus = WebsiteStatus.query().fetch()
@@ -302,7 +307,7 @@ class WebhookHandler(webapp2.RequestHandler):
             wstatus = wstatus[0]
         if not wstatus.status:
             message(strings["status_offline_response"])
-            return
+            return response
 
         if text.startswith('/'):
             if text == '/start':
@@ -310,7 +315,7 @@ class WebhookHandler(webapp2.RequestHandler):
                 client.status = '1'
                 client.temp = 'init'
                 client.put()
-                return
+                return response
             elif text == '/forcesubmit':
                 if client.status == 'endgame 1':
                     now = datetime.now() + timedelta(hours=8)
@@ -326,7 +331,7 @@ class WebhookHandler(webapp2.RequestHandler):
                     message(msg, markup)
                     client.status = 'endgame 2'
                     client.put()
-                    return
+                    return response
             reply(strings["invalid_input"])
 
         elif client.status == '1':
@@ -350,7 +355,7 @@ class WebhookHandler(webapp2.RequestHandler):
                 reply(strings["status_offline_response"])
             else:
                 reply(strings["invalid_url"])
-            return
+            return response
 
         elif client.status == '2':
             if text == strings["group_keyboard_yes"]:
@@ -367,12 +372,12 @@ class WebhookHandler(webapp2.RequestHandler):
                     message(msg, markup)
                 client.status = '3'
                 client.put()
-                return
+                return response
             elif text == strings["group_keyboard_no"]:
                 message(strings["SAF100_2"])
                 client.status = '1'
                 client.put()
-                return
+                return response
             else:
                 msg = strings["use_keyboard"]
                 markup = {
@@ -385,7 +390,7 @@ class WebhookHandler(webapp2.RequestHandler):
                     "one_time_keyboard": True
                 }
                 message(msg, markup)
-                return
+                return response
 
         elif client.status == '3':
             gm = json.loads(client.groupMembers)
@@ -420,7 +425,7 @@ class WebhookHandler(webapp2.RequestHandler):
                     }
                     message(msg, markup)
             client.put()
-            return
+            return response
 
         elif client.status == '4':
             if text == strings["member_keyboard_yes"]:
@@ -441,7 +446,7 @@ class WebhookHandler(webapp2.RequestHandler):
                     message(strings["pin_msg_1"])
                     client.status = '5'
                 client.put()
-                return
+                return response
             elif text == strings["member_keyboard_no"]:
                 gm = json.loads(client.groupMembers)
                 name_list = '\n'.join([str(i + 1) + '. ' + gm[i]["identifier"] for i in range(len(gm))])
@@ -457,7 +462,7 @@ class WebhookHandler(webapp2.RequestHandler):
                 client.status = '3'
                 client.put()
                 client.put()
-                return
+                return response
             elif text == strings["pin_keyboard"]:  # triggered if user set pin after prompted to by bot
                 groupFlag = setGroupId(client, 'https://temptaking.ado.sg/group/{}'.format(client.groupId))
                 if groupFlag == 0:
@@ -475,7 +480,7 @@ class WebhookHandler(webapp2.RequestHandler):
                     # check that hasPin is now True
                     gm = json.loads(client.groupMembers)
                     try:
-                        index = [obj["identifier"] for obj in gm].index(client.memberName)  # if this throws an 
+                        index = [obj["identifier"] for obj in gm].index(client.memberName)  # if this throws an
                         # exception, it means the user has changed their name and is probably trying to break the bot
                         client.memberId = gm[index]["id"]
                         client.memberName = gm[index]["identifier"]
@@ -503,7 +508,7 @@ class WebhookHandler(webapp2.RequestHandler):
                         client.status = '1'
                         client.temp = 'init'
                         client.put()
-                    return
+                    return response
             else:
                 msg = strings["use_keyboard"]
                 if client.pin == 'no pin':
@@ -526,7 +531,7 @@ class WebhookHandler(webapp2.RequestHandler):
                         "one_time_keyboard": True
                     }
                 message(msg, markup)
-                return
+                return response
 
         elif client.status == '5':
             p = re.compile(r'\d{4}$').match(text)
@@ -547,7 +552,7 @@ class WebhookHandler(webapp2.RequestHandler):
                 client.status = '6'
                 client.pin = text
                 client.put()
-            return
+            return response
 
         elif client.status == '6':
             if text == strings["pin_keyboard_yes"]:
@@ -566,12 +571,12 @@ class WebhookHandler(webapp2.RequestHandler):
                 client.status = 'endgame 1'
                 client.groupMembers = ''  # flush datastore
                 client.put()
-                return
+                return response
             elif text == strings["pin_keyboard_no"]:
                 message(strings["pin_msg_4"])
                 client.status = '5'
                 client.put()
-                return
+                return response
             else:
                 msg = strings["use_keyboard"]
                 markup = {
@@ -584,7 +589,7 @@ class WebhookHandler(webapp2.RequestHandler):
                     "one_time_keyboard": True
                 }
                 message(msg, markup)
-                return
+                return response
 
         elif client.status == 'endgame 1':
             now = datetime.now() + timedelta(hours=8)
@@ -593,14 +598,14 @@ class WebhookHandler(webapp2.RequestHandler):
                 client.status = '1'
                 client.temp = 'init'
                 client.put()
-                return
+                return response
             # if the user doesn't enter summary_keyboard_no, we just assume they want to proceed
             if client.temp == 'init':
                 if now.hour < 12:
                     message(now.strftime(strings["new_user_AM"]))
                 else:
                     message(now.strftime(strings["new_user_PM"]))
-                return
+                return response
             else:
                 if now.hour < 12:
                     message((now.strftime(
@@ -610,7 +615,7 @@ class WebhookHandler(webapp2.RequestHandler):
                     message((now.strftime(
                         strings["already_submitted_PM"]).decode("utf-8").format(client.temp, u'\u00b0')
                              + strings["old_user_PM"]))
-            return
+            return response
 
         elif client.status == 'endgame 2':
             p = re.compile(r'\d{2}[.]\d{1}$').match(text)
@@ -655,7 +660,7 @@ class WebhookHandler(webapp2.RequestHandler):
                         client.put()
                     else:
                         message(strings["temp_submit_error"])
-                return
+                return response
         elif client.status == 'wrong pin':
             p = re.compile(r'\d{4}$').match(text)
             if p is None:
@@ -675,7 +680,7 @@ class WebhookHandler(webapp2.RequestHandler):
                 client.status = 'resubmit temp'
                 client.pin = text
                 client.put()
-            return
+            return response
         elif client.status == 'resubmit temp':
             if text == strings["pin_resubmit_temp"]:
                 temperatures = generateTemperatures()
@@ -687,12 +692,12 @@ class WebhookHandler(webapp2.RequestHandler):
                 message(msg, markup)
                 client.status = 'endgame 2'
                 client.put()
-                return
+                return response
             elif text == strings["pin_keyboard_no"]:
                 message(strings["pin_msg_4"])
                 client.status = 'wrong pin'
                 client.put()
-                return
+                return response
             else:
                 msg = strings["use_keyboard"]
                 markup = {
@@ -705,17 +710,7 @@ class WebhookHandler(webapp2.RequestHandler):
                     "one_time_keyboard": True
                 }
                 message(msg, markup)
-                return
+                return response
         else:
             reply(strings["invalid_input"])
-            return
-
-
-app = webapp2.WSGIApplication([
-    ('/me', MeHandler),
-    ('/set_webhook', SetWebhookHandler),
-    ('/webhook', WebhookHandler),
-    ('/remind', ReminderHandler),
-    ('/broadcast', BroadcastHandler),
-    ('/website_status', WebsiteStatusHandler),
-], debug=True)
+            return response
