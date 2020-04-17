@@ -32,19 +32,19 @@ def loadStrings():
 
 
 class WebsiteStatus(ndb.Model):
-    status = ndb.BooleanProperty(default=True)
+    status = ndb.BooleanProperty(default=True, indexed=False)
 
 
 class Client(ndb.Model):
-    firstName = ndb.StringProperty(indexed=False)
-    status = ndb.StringProperty(default='0',indexed=False)
-    groupId = ndb.StringProperty(indexed=False)
-    groupName = ndb.StringProperty(indexed=False)
+    firstName = ndb.StringProperty()
+    status = ndb.StringProperty(default='0')
+    groupId = ndb.StringProperty()
+    groupName = ndb.StringProperty()
     groupMembers = ndb.StringProperty(indexed=False)
-    memberName = ndb.StringProperty(indexed=False)
-    memberId = ndb.StringProperty(indexed=False)
-    pin = ndb.StringProperty(indexed=False)
-    temp = ndb.StringProperty(indexed=False)
+    memberName = ndb.StringProperty()
+    memberId = ndb.StringProperty()
+    pin = ndb.StringProperty()
+    temp = ndb.StringProperty()
 
 
 tokens = loadTokens()
