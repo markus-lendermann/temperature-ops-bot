@@ -51,8 +51,17 @@ tokens = loadTokens()
 strings = loadStrings()
 test = queue.Queue()
 
+
 telegramApi = TelegramApiWrapper(tokens["telegram-bot"])
 BASE_URL = 'https://api.telegram.org/bot' + tokens["telegram-bot"] + '/'
+
+wstatus = WebsiteStatus.query().fetch()
+if len(wstatus) == 0:
+    wstatus = WebsiteStatus.get_or_insert('status')
+    wstatus.status = True  # if status object doesn't exist yet, initialize as true
+    wstatus.put()
+else:
+    wstatus = wstatus[0]
 
 
 class MeHandler(webapp2.RequestHandler):
@@ -74,13 +83,7 @@ class SetWebhookHandler(webapp2.RequestHandler):
 
 class WebsiteStatusHandler(webapp2.RequestHandler):
     def get(self):
-        wstatus = WebsiteStatus.query().fetch()
-        if len(wstatus) == 0:
-            wstatus = WebsiteStatus.get_or_insert('status')
-            wstatus.status = True  # if status object doesn't exist yet, initialize as true
-            wstatus.put()
-        else:
-            wstatus = wstatus[0]
+        wstatus = WebsiteStatus.get_or_insert('status')[0]
         try:
             requests.get("https://temptaking.ado.sg")
             if not wstatus.status:
@@ -130,7 +133,7 @@ class ReminderHandler(webapp2.RequestHandler):
                         client.temp = 'none'
             if client.temp == 'none':
                 if wstatus.status:
-                    temperatures = [[str(x / 10), str((x + 1) / 10)] for x in range(355, 375, 2)]
+                    temperatures = generateTemperatures()
                     if now.hour < 12:
                         text = now.strftime(strings["window_open_AM"])
                     else:
@@ -297,25 +300,8 @@ class WebhookHandler(webapp2.RequestHandler):
             message(strings["status_offline_response"])
             return
 
-        def endgame2():
-            client.status = 'endgame 2'
-            client.put()
-            now = datetime.now() + timedelta(hours=8)
-            if now.hour < 12:
-                meridies = 'AM'
-            else:
-                meridies = 'PM'
-            temperatures = [[str(x / 10), str((x + 1) / 10)] for x in range(355, 375, 2)]
-            form_fields = {
-                'chat_id': str(chat_id),
-                'text': now.strftime("It's now %H:%M on %A, %d/%m/%y. You are eligible for " + meridies +
-                                     " submission.\n\n") + strings["select_temp"],
-                'reply_markup': {
-                    "keyboard": temperatures,
-                    "one_time_keyboard": True
-                }
-            }
-            requests.post(BASE_URL + 'sendMessage', json=form_fields)
+        def generateTemperatures():
+            return [[str(x / 10), str((x + 1) / 10)] for x in range(355, 375, 2)]
 
         if text.startswith('/'):
             if text == '/start':
@@ -326,7 +312,19 @@ class WebhookHandler(webapp2.RequestHandler):
                 return
             elif text == '/forcesubmit':
                 if client.status == 'endgame 1':
-                    endgame2()
+                    now = datetime.now() + timedelta(hours=8)
+                    temperatures = generateTemperatures()
+                    if now.hour < 12:
+                        msg = now.strftime(strings["window_open_AM"])
+                    else:
+                        msg = now.strftime(strings["window_open_PM"])
+                    markup = {
+                        "keyboard": temperatures,
+                        "one_time_keyboard": True
+                    }
+                    message(msg, markup)
+                    client.status = 'endgame 2'
+                    client.put()
                     return
             reply(strings["invalid_input"])
 
@@ -334,7 +332,7 @@ class WebhookHandler(webapp2.RequestHandler):
             group_url = text
             groupFlag = setGroupId(client, group_url)
             if groupFlag == 1:
-                msg = strings["group_msg"] + client.groupName
+                msg = strings["group_msg"].format(client.groupName)
                 markup = {
                     "keyboard": [
                         [
@@ -553,7 +551,7 @@ class WebhookHandler(webapp2.RequestHandler):
         elif client.status == '6':
             if text == strings["pin_keyboard_yes"]:
                 message(strings["pin_msg_3"].format(client.pin))
-                msg = strings["setup_summary"].format(client.groupName,client.memberName,client.memberId,client.pin)
+                msg = strings["setup_summary"].format(client.groupName, client.memberName, client.memberId, client.pin)
                 markup = {
                     "keyboard": [
                         [
@@ -616,7 +614,7 @@ class WebhookHandler(webapp2.RequestHandler):
         elif client.status == 'endgame 2':
             p = re.compile(r'\d{2}[.]\d{1}$').match(text)
             if p is None:
-                temperatures = [[str(x / 10), str((x + 1) / 10)] for x in range(355, 375, 2)]
+                temperatures = generateTemperatures()
                 msg = strings["invalid_temp"] + '\n\n' + strings["select_temp"]
                 markup = {
                     "keyboard": temperatures,
@@ -626,7 +624,7 @@ class WebhookHandler(webapp2.RequestHandler):
             else:
                 temp = float(text)
                 if temp >= 40.05 or temp <= 34.95:
-                    temperatures = [[str(x / 10), str((x + 1) / 10)] for x in range(355, 375, 2)]
+                    temperatures = generateTemperatures()
                     msg = strings["temp_outside_range"].decode("utf-8").format(deg=u'\u00b0')
                     markup = {
                         "keyboard": temperatures,
@@ -679,7 +677,7 @@ class WebhookHandler(webapp2.RequestHandler):
             return
         elif client.status == 'resubmit temp':
             if text == strings["pin_resubmit_temp"]:
-                temperatures = [[str(x / 10), str((x + 1) / 10)] for x in range(355, 375, 2)]
+                temperatures = generateTemperatures()
                 msg = strings["select_temp"]
                 markup = {
                     "keyboard": temperatures,
