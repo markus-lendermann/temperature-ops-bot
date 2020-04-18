@@ -14,6 +14,8 @@ logging.basicConfig(
 )
 
 
+# TODO: websiteStatus behaviour, proper exception handling
+
 # load private API tokens from file
 def loadTokens():
     with open("tokens.json") as tf:
@@ -176,6 +178,7 @@ def remind():
                     payload = {
                         'chat_id': str(key_id),
                         'text': text,
+                        "parse_mode": "HTML",
                         'reply_markup': {
                             "keyboard": temperatures,
                             "one_time_keyboard": True
@@ -224,7 +227,7 @@ def webhook():
         client = Client.get_or_insert(str(chat_id))
 
         if client.firstName != fr:
-            client.firstName = fr
+            client.firstName = fr["first_name"]
             client.put()
 
         # reply function used in context of this response only
