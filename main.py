@@ -330,7 +330,9 @@ def webhook():
                 markup = {
                     "keyboard": [
                         [
-                            strings["group_keyboard_yes"],
+                            strings["group_keyboard_yes"]
+                        ],
+                        [
                             strings["group_keyboard_no"]
                         ]
                     ],
@@ -371,7 +373,9 @@ def webhook():
                 markup = {
                     "keyboard": [
                         [
-                            strings["group_keyboard_yes"],
+                            strings["group_keyboard_yes"]
+                        ],
+                        [
                             strings["group_keyboard_no"]
                         ]
                     ],
@@ -392,7 +396,9 @@ def webhook():
                 markup = {
                     "keyboard": [
                         [
-                            strings["member_keyboard_yes"],
+                            strings["member_keyboard_yes"]
+                        ],
+                        [
                             strings["member_keyboard_no"]
                         ]
                     ],
@@ -512,7 +518,9 @@ def webhook():
                     markup = {
                         "keyboard": [
                             [
-                                strings["member_keyboard_yes"],
+                                strings["member_keyboard_yes"]
+                            ],
+                            [
                                 strings["member_keyboard_no"]
                             ]
                         ],
@@ -530,7 +538,9 @@ def webhook():
                 markup = {
                     "keyboard": [
                         [
-                            strings["pin_keyboard_yes"],
+                            strings["pin_keyboard_yes"]
+                        ],
+                        [
                             strings["pin_keyboard_no"]
                         ]
                     ],
@@ -570,7 +580,9 @@ def webhook():
                 markup = {
                     "keyboard": [
                         [
-                            strings["pin_keyboard_yes"],
+                            strings["pin_keyboard_yes"]
+                        ],
+                        [
                             strings["pin_keyboard_no"]
                         ]
                     ],
@@ -597,11 +609,11 @@ def webhook():
             else:
                 if now.hour < 12:
                     message((strftime(now,
-                        strings["already_submitted_AM"]).format(client.temp)
+                                      strings["already_submitted_AM"]).format(client.temp)
                              + strings["old_user_AM"]))
                 else:
                     message((strftime(now,
-                        strings["already_submitted_PM"]).format(client.temp)
+                                      strings["already_submitted_PM"]).format(client.temp)
                              + strings["old_user_PM"]))
             return response
 
@@ -632,11 +644,11 @@ def webhook():
                         now = datetime.now() + timedelta(hours=8)
                         if now.hour < 12:
                             message((strftime(now,
-                                strings["just_submitted_AM"]).format(client.temp)
+                                              strings["just_submitted_AM"]).format(client.temp)
                                      + strings["old_user_AM"]))
                         else:
                             message((strftime(now,
-                                strings["just_submitted_PM"]).format(client.temp)
+                                              strings["just_submitted_PM"]).format(client.temp)
                                      + strings["old_user_PM"]))
                         client.status = 'endgame 1'
                         client.groupMembers = ''  # flush datastore
@@ -691,7 +703,9 @@ def webhook():
                 markup = {
                     "keyboard": [
                         [
-                            strings["pin_keyboard_yes"],
+                            strings["pin_keyboard_yes"]
+                        ],
+                        [
                             strings["pin_keyboard_no"]
                         ]
                     ],
