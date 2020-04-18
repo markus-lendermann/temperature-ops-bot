@@ -36,5 +36,5 @@ memberName = "Shawn"
 memberId = "298347"
 pin = "1234"
 
-msg = strings["temp_submit_error"]
+msg = strftime(now, strings["just_submitted_PM"].format("35.9") + strings["old_user_PM"])
 print(sendBroadcast(msg))

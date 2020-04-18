@@ -350,7 +350,7 @@ def webhook():
         elif client.status == '2':
             if text == strings["group_keyboard_yes"]:
                 gm = json.loads(client.groupMembers)
-                name_list = '\n'.join([str(i + 1) + '. ' + gm[i]["identifier"] for i in range(len(gm))])
+                name_list = '\n'.join([str(i + 1) + '. ' + "<b>{}</b>".format(gm[i]["identifier"]) for i in range(len(gm))])
                 if len(gm) > 300 or len(strings["member_msg_1"] + name_list) > 4096:
                     message(strings["member_overflow"].format(str(len(gm))))
                 else:
@@ -408,7 +408,7 @@ def webhook():
                 client.status = '4'
             except ValueError:
                 # user input does not match any identifier
-                name_list = '\n'.join([str(i + 1) + '. ' + gm[i]["identifier"] for i in range(len(gm))])
+                name_list = '\n'.join([str(i + 1) + '. ' + "<b>{}</b>".format(gm[i]["identifier"]) for i in range(len(gm))])
                 if len(gm) > 300 or len(strings["member_msg_1"] + name_list) > 4096:
                     reply(strings["member_overflow_wrong"].format(text))
                 else:
@@ -423,7 +423,6 @@ def webhook():
 
         elif client.status == '4':
             if text == strings["member_keyboard_yes"]:
-                message(strings["member_id_msg"].format(client.memberId))
                 if client.pin == 'False':
                     msg = strings["set_pin_1"].format(client.groupId)
                     markup = {
@@ -443,7 +442,7 @@ def webhook():
                 return response
             elif text == strings["member_keyboard_no"]:
                 gm = json.loads(client.groupMembers)
-                name_list = '\n'.join([str(i + 1) + '. ' + gm[i]["identifier"] for i in range(len(gm))])
+                name_list = '\n'.join([str(i + 1) + '. ' + "<b>{}</b>".format(gm[i]["identifier"]) for i in range(len(gm))])
                 if len(gm) > 300 or len(strings["member_msg_1"] + name_list) > 4096:
                     message(strings["member_overflow"].format(str(len(gm))))
                 else:
@@ -454,7 +453,6 @@ def webhook():
                     }
                     message(msg, markup)
                 client.status = '3'
-                client.put()
                 client.put()
                 return response
             elif text == strings["pin_keyboard"]:  # triggered if user set pin after prompted to by bot
@@ -554,8 +552,7 @@ def webhook():
 
         elif client.status == '6':
             if text == strings["pin_keyboard_yes"]:
-                message(strings["pin_msg_3"].format(client.pin))
-                msg = strings["setup_summary"].format(client.groupName, client.memberName, client.memberId, client.pin)
+                msg = strings["setup_summary"].format(client.groupName, client.memberName, client.pin)
                 markup = {
                     "keyboard": [
                         [
@@ -571,7 +568,7 @@ def webhook():
                 client.put()
                 return response
             elif text == strings["pin_keyboard_no"]:
-                message(strings["pin_msg_4"])
+                message(strings["pin_msg_3"])
                 client.status = '5'
                 client.put()
                 return response
@@ -670,7 +667,9 @@ def webhook():
                 markup = {
                     "keyboard": [
                         [
-                            strings["pin_resubmit_temp"],
+                            strings["pin_resubmit_temp"]
+                        ],
+                        [
                             strings["pin_keyboard_no"]
                         ]
                     ],
@@ -694,7 +693,7 @@ def webhook():
                 client.put()
                 return response
             elif text == strings["pin_keyboard_no"]:
-                message(strings["pin_msg_4"])
+                message(strings["pin_msg_3"])
                 client.status = 'wrong pin'
                 client.put()
                 return response
@@ -703,7 +702,7 @@ def webhook():
                 markup = {
                     "keyboard": [
                         [
-                            strings["pin_keyboard_yes"]
+                            strings["pin_resubmit_temp"]
                         ],
                         [
                             strings["pin_keyboard_no"]
