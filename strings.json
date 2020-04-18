@@ -11,7 +11,7 @@
   "group_msg": "Group name: <b>{}</b>",
   "group_keyboard_yes": "That's right",
   "group_keyboard_no": "No it's not",
-  "invalid_url": "<b>❌ This isn't a valid temptaking URL</b>\n\n<i>Format:</i>\n<pre>temptaking.ado.sg/group/&lt;code&gt;</pre>",
+  "invalid_url": "<b>❌ This isn't a valid temptaking URL</b>\n\n<i>Expected format:</i>\n<pre>temptaking.ado.sg/group/&lt;code&gt;</pre>",
   "use_keyboard": "Please choose a reply from this keyboard:",
   "member_msg_1": "<i>Please enter your name:</i>\n",
   "member_msg_2": "Member name: <b>{}</b>",

@@ -68,7 +68,7 @@ def emojiTime(now):
     minute = now.minute
     clocks = strings["clocks"]
 
-    return clocks[round(2*(hour + minute/60) % 24)]
+    return clocks[round(2 * (hour + minute / 60) % 24)]
 
 
 def strftime(datetimeobject, formatstring):
@@ -223,6 +223,10 @@ def webhook():
         chat_id = chat['id']
         client = Client.get_or_insert(str(chat_id))
 
+        if client.firstName != fr:
+            client.firstName = fr
+            client.put()
+
         # reply function used in context of this response only
         def reply(msg=None, markup=None):
             if msg:
@@ -358,7 +362,8 @@ def webhook():
         elif client.status == '2':
             if text == strings["group_keyboard_yes"]:
                 gm = json.loads(client.groupMembers)
-                name_list = '\n'.join([str(i + 1) + '. ' + "<b>{}</b>".format(gm[i]["identifier"]) for i in range(len(gm))])
+                name_list = '\n'.join(
+                    [str(i + 1) + '. ' + "<b>{}</b>".format(gm[i]["identifier"]) for i in range(len(gm))])
                 if len(gm) > 300 or len(strings["member_msg_1"] + name_list) > 4096:
                     message(strings["member_overflow"].format(str(len(gm))))
                 else:
@@ -416,7 +421,8 @@ def webhook():
                 client.status = '4'
             except ValueError:
                 # user input does not match any identifier
-                name_list = '\n'.join([str(i + 1) + '. ' + "<b>{}</b>".format(gm[i]["identifier"]) for i in range(len(gm))])
+                name_list = '\n'.join(
+                    [str(i + 1) + '. ' + "<b>{}</b>".format(gm[i]["identifier"]) for i in range(len(gm))])
                 if len(gm) > 300 or len(strings["member_msg_1"] + name_list) > 4096:
                     reply(strings["member_overflow_wrong"].format(text))
                 else:
@@ -450,7 +456,8 @@ def webhook():
                 return response
             elif text == strings["member_keyboard_no"]:
                 gm = json.loads(client.groupMembers)
-                name_list = '\n'.join([str(i + 1) + '. ' + "<b>{}</b>".format(gm[i]["identifier"]) for i in range(len(gm))])
+                name_list = '\n'.join(
+                    [str(i + 1) + '. ' + "<b>{}</b>".format(gm[i]["identifier"]) for i in range(len(gm))])
                 if len(gm) > 300 or len(strings["member_msg_1"] + name_list) > 4096:
                     message(strings["member_overflow"].format(str(len(gm))))
                 else:
