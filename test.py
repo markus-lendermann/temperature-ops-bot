@@ -27,14 +27,23 @@ def strftime(datetimeobject, formatstring):
         formatstring = formatstring.replace(p, v)
     return formatstring.replace("percent_placeholder", "%")
 
+
+# def emojiTime(now):
+#     hour = now.hour
+#     minute = now.minute
+#     clocks = ["🕛", "🕧", "🕐", "🕜", "🕑", "🕝", "🕒", "🕞", "🕓", "🕟", "🕔", "🕠", "🕕", "🕡", "🕖", "🕢", "🕗", "🕣", "🕘", "🕤", "🕙", "🕥", "🕚", "🕦"]
+#
+#     return clocks[round(2*(hour + minute/60) % 24)]
+
 strings = loadStrings()
 
 now = datetime.now()
+
 
 groupName = "BMTC SCH 1"
 memberName = "Shawn"
 memberId = "298347"
 pin = "1234"
 
-msg = strftime(now, strings["just_submitted_PM"].format("35.9") + strings["old_user_PM"])
+msg = strftime(now, strings["already_submitted_PM"].format("35.9") + strings["old_user_PM"])
 print(sendBroadcast(msg))
