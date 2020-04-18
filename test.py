@@ -1,5 +1,6 @@
 import requests
 import json
+import re
 from timeit import default_timer as timer
 from datetime import datetime, timedelta
 
@@ -9,20 +10,32 @@ def loadStrings():
         strings = json.load(tf)
 
     return strings
+
+
+def sendBroadcast(msg):
+    r = requests.post('https://tempbotv2.ey.r.appspot.com/broadcast', json={"msg": msg})
+    return r.text
+
+
+def strftime(datetimeobject, formatstring):
+    formatstring = formatstring.replace("%%", "percent_placeholder")
+    ps = list(set(re.findall("(%.)", formatstring)))
+    format2 = "|".join(ps)
+    vs = datetimeobject.strftime(format2).split("|")
+    for p, v in zip(ps, vs):
+        formatstring = formatstring.replace(p, v)
+    return formatstring.replace("percent_placeholder", "%")
+
 strings = loadStrings()
 
 now = datetime.now()
 
-msg = "<i>Setup Summary</i>\nGroup name: <b>{}</b>\nMember name: <b>{}</b>\nMember ID: <b>{}</b>\nPin: <b>{}</b>".format("TCRM Temperature OPS", "Markus", "123456", "0000")
+groupName = "BMTC SCH 1"
+memberName = "Shawn"
+memberId = "298347"
+pin = "1234"
 
-msg = strings["SAF100"]
+msg = strings["temp_outside_range"]
 
-
-url = 'https://tempbotv2.ey.r.appspot.com/broadcast'
-payload = {
-    "msg": msg
-}
-
-
-r = requests.post(url, json=payload)
-print(r.text)
+print(msg)
+print(sendBroadcast(msg))
