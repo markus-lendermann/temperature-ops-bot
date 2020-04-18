@@ -63,6 +63,14 @@ def generateTemperatures():
     return [[str(x / 10), str((x + 1) / 10)] for x in range(355, 375, 2)]
 
 
+def emojiTime(now):
+    hour = now.hour
+    minute = now.minute
+    clocks = strings["clocks"]
+
+    return clocks[round(2*(hour + minute/60) % 24)]
+
+
 def strftime(datetimeobject, formatstring):
     formatstring = formatstring.replace("%%", "percent_placeholder")
     ps = list(set(re.findall("(%.)", formatstring)))
@@ -618,7 +626,7 @@ def webhook():
             p = re.compile(r'\d{2}[.]\d$').match(text)
             if p is None:
                 temperatures = generateTemperatures()
-                msg = strings["invalid_temp"] + '\n\n' + strings["select_temp"]
+                msg = strings["invalid_temp"]
                 markup = {
                     "keyboard": temperatures,
                     "one_time_keyboard": True
@@ -641,11 +649,11 @@ def webhook():
                         now = datetime.now() + timedelta(hours=8)
                         if now.hour < 12:
                             message((strftime(now,
-                                              strings["just_submitted_AM"]).format(client.temp)
+                                              strings["just_submitted_AM"]).format(emojiTime(now), client.temp)
                                      + strings["old_user_AM"]))
                         else:
                             message((strftime(now,
-                                              strings["just_submitted_PM"]).format(client.temp)
+                                              strings["just_submitted_PM"]).format(emojiTime(now), client.temp)
                                      + strings["old_user_PM"]))
                         client.status = 'endgame 1'
                         client.groupMembers = ''  # flush datastore
