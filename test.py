@@ -13,6 +13,7 @@ def loadStrings():
 
 
 def sendBroadcast(msg):
+    print(msg)
     r = requests.post('https://tempbotv2.ey.r.appspot.com/broadcast', json={"msg": msg})
     return r.text
 
@@ -35,7 +36,5 @@ memberName = "Shawn"
 memberId = "298347"
 pin = "1234"
 
-msg = strings["temp_outside_range"]
-
-print(msg)
+msg = strings["temp_submit_error"]
 print(sendBroadcast(msg))

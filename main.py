@@ -347,7 +347,7 @@ def webhook():
 
         elif client.status == '2':
             if text == strings["group_keyboard_yes"]:
-                gm = json.loads(client.groupMembers)[0:323]
+                gm = json.loads(client.groupMembers)
                 name_list = '\n'.join([str(i + 1) + '. ' + gm[i]["identifier"] for i in range(len(gm))])
                 if len(gm) > 300 or len(strings["member_msg_1"] + name_list) > 4096:
                     message(strings["member_overflow"].format(str(len(gm))))
@@ -647,7 +647,7 @@ def webhook():
                         client.temp = 'error'
                         client.put()
                     else:
-                        message(strings["temp_submit_error"])
+                        message(strings["temp_submit_error"].format(client.groupId))
                 return response
         elif client.status == 'wrong pin':
             p = re.compile(r'\d{4}$').match(text)
