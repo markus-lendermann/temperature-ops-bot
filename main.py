@@ -63,6 +63,16 @@ def generateTemperatures():
     return [[str(x / 10), str((x + 1) / 10)] for x in range(355, 375, 2)]
 
 
+def strftime(datetimeobject, formatstring):
+    formatstring = formatstring.replace("%%", "percent_placeholder")
+    ps = list(set(re.findall("(%.)", formatstring)))
+    format2 = "|".join(ps)
+    vs = datetimeobject.strftime(format2).split("|")
+    for p, v in zip(ps, vs):
+        formatstring = formatstring.replace(p, v)
+    return formatstring.replace("percent_placeholder", "%")
+
+
 def submitTemp(client, temp):
     now = datetime.now() + timedelta(hours=8)
     if now.hour < 12:
@@ -73,7 +83,7 @@ def submitTemp(client, temp):
         url = 'https://temptaking.ado.sg/group/MemberSubmitTemperature'
         payload = {
             'groupCode': client.groupId,
-            'date': now.strftime('%d/%m/%Y'),
+            'date': strftime(now, '%d/%m/%Y'),
             'meridies': meridies,
             'memberId': client.memberId,
             'temperature': temp,
@@ -152,9 +162,9 @@ def remind():
                 if wstatus.status:
                     temperatures = generateTemperatures()
                     if now.hour < 12:
-                        text = now.strftime(strings["window_open_AM"])
+                        text = strftime(now, strings["window_open_AM"])
                     else:
-                        text = now.strftime(strings["window_open_PM"])
+                        text = strftime(now, strings["window_open_PM"])
                     payload = {
                         'chat_id': str(key_id),
                         'text': text,
@@ -299,9 +309,9 @@ def webhook():
                     now = datetime.now() + timedelta(hours=8)
                     temperatures = generateTemperatures()
                     if now.hour < 12:
-                        msg = now.strftime(strings["window_open_AM"])
+                        msg = strftime(now, strings["window_open_AM"])
                     else:
-                        msg = now.strftime(strings["window_open_PM"])
+                        msg = strftime(now, strings["window_open_PM"])
                     markup = {
                         "keyboard": temperatures,
                         "one_time_keyboard": True
@@ -340,7 +350,7 @@ def webhook():
                 gm = json.loads(client.groupMembers)[0:323]
                 name_list = '\n'.join([str(i + 1) + '. ' + gm[i]["identifier"] for i in range(len(gm))])
                 if len(gm) > 300 or len(strings["member_msg_1"] + name_list) > 4096:
-                    message(strings["member_overflow"])
+                    message(strings["member_overflow"].format(str(len(gm))))
                 else:
                     msg = strings["member_msg_1"] + name_list
                     markup = {
@@ -394,9 +404,9 @@ def webhook():
                 # user input does not match any identifier
                 name_list = '\n'.join([str(i + 1) + '. ' + gm[i]["identifier"] for i in range(len(gm))])
                 if len(gm) > 300 or len(strings["member_msg_1"] + name_list) > 4096:
-                    reply(strings["member_overflow_wrong"])
+                    reply(strings["member_overflow_wrong"].format(text))
                 else:
-                    msg = strings["use_keyboard"]
+                    msg = strings["member_msg_1"] + name_list
                     markup = {
                         "keyboard": [[item["identifier"]] for item in gm],
                         "one_time_keyboard": True
@@ -429,7 +439,7 @@ def webhook():
                 gm = json.loads(client.groupMembers)
                 name_list = '\n'.join([str(i + 1) + '. ' + gm[i]["identifier"] for i in range(len(gm))])
                 if len(gm) > 300 or len(strings["member_msg_1"] + name_list) > 4096:
-                    message(strings["member_overflow"])
+                    message(strings["member_overflow"].format(str(len(gm))))
                 else:
                     msg = strings["member_msg_3"] + name_list
                     markup = {
@@ -580,23 +590,23 @@ def webhook():
             # if the user doesn't enter summary_keyboard_no, we just assume they want to proceed
             if client.temp == 'init':
                 if now.hour < 12:
-                    message(now.strftime(strings["new_user_AM"]))
+                    message(strftime(now, strings["new_user_AM"]))
                 else:
-                    message(now.strftime(strings["new_user_PM"]))
+                    message(strftime(now, strings["new_user_PM"]))
                 return response
             else:
                 if now.hour < 12:
-                    message((now.strftime(
-                        strings["already_submitted_AM"]).format(client.temp, u'\u00b0')
+                    message((strftime(now,
+                        strings["already_submitted_AM"]).format(client.temp)
                              + strings["old_user_AM"]))
                 else:
-                    message((now.strftime(
-                        strings["already_submitted_PM"]).format(client.temp, u'\u00b0')
+                    message((strftime(now,
+                        strings["already_submitted_PM"]).format(client.temp)
                              + strings["old_user_PM"]))
             return response
 
         elif client.status == 'endgame 2':
-            p = re.compile(r'\d{2}[.]\d{1}$').match(text)
+            p = re.compile(r'\d{2}[.]\d$').match(text)
             if p is None:
                 temperatures = generateTemperatures()
                 msg = strings["invalid_temp"] + '\n\n' + strings["select_temp"]
@@ -609,7 +619,7 @@ def webhook():
                 temp = float(text)
                 if temp >= 40.05 or temp <= 34.95:
                     temperatures = generateTemperatures()
-                    msg = strings["temp_outside_range"].format(deg=u'\u00b0')
+                    msg = strings["temp_outside_range"]
                     markup = {
                         "keyboard": temperatures,
                         "one_time_keyboard": True
@@ -621,15 +631,15 @@ def webhook():
                         client.temp = text
                         now = datetime.now() + timedelta(hours=8)
                         if now.hour < 12:
-                            message((now.strftime(
-                                strings["just_submitted_AM"]).format(client.temp, u'\u00b0')
+                            message((strftime(now,
+                                strings["just_submitted_AM"]).format(client.temp)
                                      + strings["old_user_AM"]))
                         else:
-                            message((now.strftime(
-                                strings["just_submitted_PM"]).format(client.temp, u'\u00b0')
+                            message((strftime(now,
+                                strings["just_submitted_PM"]).format(client.temp)
                                      + strings["old_user_PM"]))
                         client.status = 'endgame 1'
-                        client.groupMembers  # flush datastore
+                        client.groupMembers = ''  # flush datastore
                         client.put()
                     elif resp == 'Wrong pin.':
                         message(strings["wrong_pin"])
@@ -691,4 +701,4 @@ def webhook():
                 return response
         else:
             reply(strings["invalid_input"])
-            return response
+        return response
