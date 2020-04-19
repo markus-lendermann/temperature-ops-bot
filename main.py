@@ -159,8 +159,8 @@ def remind():
     with ndb_client.context():
         wstatus = WebsiteStatus.get_or_insert('status')
         all_clients = Client.query().fetch(keys_only=True)
-        for i in range(len(all_clients)):
-            client = all_clients[i]
+        i = 0
+        for client in all_clients:
             key_id = client.id()
             client = client.get()
             now = datetime.now() + timedelta(hours=8)
@@ -186,8 +186,9 @@ def remind():
                     }
                     telegramApi.sendMessage(payload)
                     client.status = 'endgame 2'
+                    i += 1
             client.put()
-            return 'ok'
+        return 'reminder sent to {} clients'.format(i)
 
 
 @app.route('/broadcast', methods=["POST"])
