@@ -14,8 +14,6 @@ logging.basicConfig(
 )
 
 
-# TODO: websiteStatus behaviour, proper exception handling
-
 # load private API tokens from file
 def loadTokens():
     with open("tokens.json") as tf:
@@ -34,6 +32,8 @@ def loadStrings():
 
 class WebsiteStatus(ndb.Model):
     status = ndb.BooleanProperty(default=True)
+    # url = ndb.StringProperty(default="https://temptaking.ado.sg")  # for debugging purposes
+    skippedReminder = ndb.BooleanProperty(default=False)
 
 
 class Client(ndb.Model):
@@ -122,59 +122,124 @@ def getWebhook():
         return "webhook failed to set. DEBUG: " + str(resp)
 
 
+# # for debugging purposes
+# @app.route('/flipSwitch')
+# def flipSwitch():
+#     with ndb_client.context():
+#         wstatus = WebsiteStatus.get_or_insert('status')
+#         if wstatus.url == "https://temptaking.ado.sg":
+#             wstatus.url = "https://temptaking.ado.sgs"  # force website to appear offline
+#         else:
+#             wstatus.url = "https://temptaking.ado.sg"
+#         wstatus.put()
+#         return wstatus.url
+
+
 @app.route('/websiteStatus')
-def websiteStatus():
-    with ndb_client.context():
+def websiteStatus(context=None):
+    def websiteStatus():
         wstatus = WebsiteStatus.get_or_insert('status')
         try:
             requests.get("https://temptaking.ado.sg")
             if not wstatus.status:
-                wstatus.status = True
-                wstatus.put()
+                # restore all client statuses to their original value before updating wstatus
                 all_clients = Client.query().fetch(keys_only=True)
+                i = 0
                 for client in all_clients:
                     key_id = client.id()
-                    payload = {
-                        'chat_id': str(key_id),
-                        'text': strings["status_online"]
-                    }
-                    telegramApi.sendMessage(payload)
+                    client = client.get()
+                    if client.status.startswith("offline"):
+                        client.status = client.status.split(",")[1]
+                        payload = {
+                            'chat_id': str(key_id),
+                            'text': strings["status_online"],
+                            'parse_mode': 'HTML'
+                        }
+                        telegramApi.sendMessage(payload)
+                        client.put()
+                        i += 1
+                # update wstatus
+                wstatus.status = True
+                if wstatus.skippedReminder:
+                    remind(True)
+                    wstatus.skippedReminder = False
+                wstatus.put()
+                return "message sent to {} clients".format(str(i))
         except:
             if wstatus.status:
                 wstatus.status = False
                 wstatus.put()
-                all_clients = Client.query().fetch(keys_only=True)
-                for client in all_clients:
-                    key_id = client.id()
-                    payload = {
-                        'chat_id': str(key_id),
-                        'text': strings["status_offline"]
-                    }
-                    telegramApi.sendMessage(payload)
-        return 'ok'
+            return "offline"
+        else:
+            return "online"
+    if context:
+        resp = websiteStatus()
+    else:
+        with ndb_client.context():
+            resp = websiteStatus()
+    return resp
+
 
 
 @app.route('/remind')
-def remind():
-    with ndb_client.context():
+def remind(context=None):
+    def remind():
         wstatus = WebsiteStatus.get_or_insert('status')
-        all_clients = Client.query().fetch(keys_only=True)
-        i = 0
-        for client in all_clients:
-            key_id = client.id()
-            client = client.get()
-            now = datetime.now() + timedelta(hours=8)
-            if now.hour == 0 or now.hour == 12:
-                if client.status == 'endgame 1' or client.status == 'endgame 2':
-                    if client.temp != 'error':
-                        client.temp = 'none'
-            if client.temp == 'none':
-                if wstatus.status:
+        if not wstatus.status:
+            if not wstatus.skippedReminder:
+                all_clients = Client.query().fetch(keys_only=True)
+                i = 0
+                for client in all_clients:
+                    key_id = client.id()
+                    client = client.get()
+                    now = datetime.now() + timedelta(hours=8)
+                    if now.hour == 0 or now.hour == 12:
+                        if client.status == 'endgame 1' or client.status == 'endgame 2':
+                            if client.temp != 'error':
+                                client.temp = 'none'
+                    if client.temp == 'none':
+                        temperatures = generateTemperatures()
+                        text = strftime(now, strings["remind_offline"])
+                        payload = {
+                            'chat_id': str(key_id),
+                            'text': text,
+                            "parse_mode": "HTML",
+                            'reply_markup': {
+                                "keyboard": temperatures,
+                                "one_time_keyboard": True
+                            }
+                        }
+                        telegramApi.sendMessage(payload)
+                        client.status = 'endgame 2'
+                        i += 1
+                    client.put()
+                wstatus.skippedReminder = True
+                wstatus.put()
+                return 'website offline. notification sent to {} clients'.format(i)
+            return "website offline"
+        else:
+            all_clients = Client.query().fetch(keys_only=True)
+            i = 0
+            for client in all_clients:
+                key_id = client.id()
+                client = client.get()
+                now = datetime.now() + timedelta(hours=8)
+                if now.hour == 0 or now.hour == 12:
+                    if client.status == 'endgame 1' or client.status == 'endgame 2':
+                        if client.temp != 'error':
+                            client.temp = 'none'
+                if client.temp == 'none':
                     temperatures = generateTemperatures()
                     if now.hour < 12:
-                        text = strftime(now, strings["window_open_AM"])
+                        if wstatus.skippedReminder:
+                            text = strings["remind_delayed"] + strftime(now, strings["window_open_AM"])
+                        else:
+                            text = strftime(now, strings["window_open_AM"])
                     else:
-                        text = strftime(now, strings["window_open_PM"])
+                        if wstatus.skippedReminder:
+                            text = strings["remind_delayed"] + strftime(now, strings["window_open_PM"])
+                        else:
+                            text = strftime(now, strings["window_open_PM"])
                     payload = {
                         'chat_id': str(key_id),
                         'text': text,
@@ -187,8 +252,14 @@ def remind():
                     telegramApi.sendMessage(payload)
                     client.status = 'endgame 2'
                     i += 1
-            client.put()
-        return 'reminder sent to {} clients'.format(i)
+                client.put()
+            return 'reminder sent to {} clients'.format(i)
+    if context:
+        resp = remind()
+    else:
+        with ndb_client.context():
+            resp = remind()
+    return resp
 
 
 @app.route('/broadcast', methods=["POST"])
@@ -311,6 +382,10 @@ def webhook():
         wstatus = WebsiteStatus.get_or_insert('status')
         if not wstatus.status:
             message(strings["status_offline_response"])
+            # remember the client's previous status
+            if not client.status.startswith("offline"):
+                client.status = "offline,{}".format(client.status)
+                client.put()
             return response
 
         if text.startswith('/'):
@@ -358,7 +433,14 @@ def webhook():
                 client.status = '2'
                 client.put()
             elif groupFlag == 0:
-                reply(strings["status_offline_response"])
+                websiteStatus(True)
+                if not wstatus.status:
+                    message(strings["status_offline_response"])
+                    if not client.status.startswith("offline"):
+                        client.status = "offline,{}".format(client.status)
+                        client.put()
+                else:
+                    message(strings["website_error"])
             else:
                 reply(strings["invalid_url"])
             return response
@@ -387,6 +469,7 @@ def webhook():
                 return response
             else:
                 msg = strings["use_keyboard"]
+                # TODO: put all these markups in a markups.json
                 markup = {
                     "keyboard": [
                         [
@@ -477,16 +560,23 @@ def webhook():
             elif text == strings["pin_keyboard"]:  # triggered if user set pin after prompted to by bot
                 groupFlag = setGroupId(client, 'https://temptaking.ado.sg/group/{}'.format(client.groupId))
                 if groupFlag == 0:
-                    msg = strings["status_offline_response"]
-                    markup = {
-                        "keyboard": [
-                            [
-                                strings["pin_keyboard"]
-                            ]
-                        ],
-                        "one_time_keyboard": True
-                    }
-                    message(msg, markup)
+                    websiteStatus(True)
+                    if not wstatus.status:
+                        message(strings["status_offline_response"])
+                        if not client.status.startswith("offline"):
+                            client.status = "offline,{}".format(client.status)
+                            client.put()
+                    else:
+                        msg = strings["website_error"]
+                        markup = {
+                            "keyboard": [
+                                [
+                                    strings["pin_keyboard"]
+                                ]
+                            ],
+                            "one_time_keyboard": True
+                        }
+                        message(msg, markup)
                 else:
                     # check that hasPin is now True
                     gm = json.loads(client.groupMembers)
@@ -519,7 +609,7 @@ def webhook():
                         client.status = '1'
                         client.temp = 'init'
                         client.put()
-                    return response
+                return response
             else:
                 msg = strings["use_keyboard"]
                 if client.pin == 'no pin':
@@ -675,7 +765,16 @@ def webhook():
                         client.temp = 'error'
                         client.put()
                     else:
-                        message(strings["temp_submit_error"].format(client.groupId))
+                        websiteStatus(True)
+                        if not wstatus.status:
+                            message(strings["status_offline_response"])
+                            if not client.status.startswith("offline"):
+                                client.status = "offline,{}".format(client.status)
+                                client.put()
+                        else:
+                            message(strings["temp_submit_error"].format(client.groupId))
+                            client.status = "endgame 1"
+                            client.put()
                 return response
         elif client.status == 'wrong pin':
             p = re.compile(r'\d{4}$').match(text)

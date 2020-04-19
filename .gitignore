@@ -2,3 +2,4 @@ venv/
 .idea/
 
 tokens.json
+tokensv2.json

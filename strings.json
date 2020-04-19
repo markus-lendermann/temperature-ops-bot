@@ -1,9 +1,11 @@
 {
-  "status_online": "[Automated Message]\n\n<b>✅ temptaking.ado.sg is back online</b>\n<i>You may now re-submit your previous request.</i>",
-  "status_offline": "[Automated Message]\n\n<b>❌ temptaking.ado.sg is offline again</b>\n<i>Please defer all requests. I'll let you know when the website is back online.</i>",
-  "status_offline_response": "<b>❌ temptaking.ado.sg is offline, so I can't respond to your request right now.</b> I will let you know when you can try again.",
+  "status_online": "<b>✅ temptaking.ado.sg is back online</b>\n<i>You may now re-submit your previous request.</i>",
+  "status_offline_response": "<b>❌ temptaking.ado.sg is offline, so I can't respond to your request right now.</b> I'll let you know when the website is back online.",
+  "website_error": "<b>An unknown error occurred while accessing temptaking.ado.sg.</b>\n\nPlease try again:",
   "window_open_AM": "<i>It's %H:%M on %A, %d/%m/%y</i>\n<b>You are eligible for AM submission.</b>\n\nPlease enter your temperature in °C:",
   "window_open_PM": "<i>It's %H:%M on %A, %d/%m/%y</i>\n<b>You are eligible for PM submission.</b>\n\nPlease enter your temperature in °C:",
+  "remind_delayed": "<b>✅ temptaking.ado.sg is back online</b>\n\n",
+  "remind_offline": "<i>It's %H:%M on %A, %d/%m/%y</i>\n\n<b>❌ temptaking.ado.sg is offline</b>\n\n<i>Reminders will resume once the website is back up.</i>",
   "select_temp": "Please enter your temperature in °C:",
   "no_text_error": "This isn't a text message. Wake up your idea.",
   "SAF100": "<b>⚠ You have been mobilised for Temperature Monitoring Ops.</b>\nPlease enter your temptaking URL:\n\n<i>Format:</i>\n<pre>temptaking.ado.sg/group/&lt;code&gt;</pre>",
@@ -45,7 +47,7 @@
   "invalid_temp": "❌ <b>This isn't a valid temperature.</b>\nPlease re-enter your temperature in °C:\n\n<i>Valid temperature format: <code>00.0</code></i>",
   "temp_outside_range": "❌ <b>This isn't a valid temperature.</b>\nPlease re-enter your temperature in °C:\n\n<i>Valid temperature range: <code>35.0 — 40.0</code></i>",
   "invalid_input": "\uD83D\uDC7A <b>This isn't a valid request.</b>\n\nWake up your idea.",
-  "temp_submit_error": "<b>An unknown error occurred while submitting your temperature.</b>\n\nPlease use <a href=\"https://temptaking.ado.sg/group/{}\">the website</a> to submit your temperature.\n\n<i>To try re-submitting, enter /forcesubmit.\nTo reset this bot at any time, enter /start.</i>",
+  "temp_submit_error": "<b>An unknown error occurred while submitting your temperature.</b>\n\nYou can try using <a href=\"https://temptaking.ado.sg/group/{}\">the website</a> to submit your temperature.\n\n<i>To try re-submitting, enter /forcesubmit.\nTo reset this bot at any time, enter /start.</i>",
   "fatal_error": "\uD83D\uDC80 <b>A fatal error occurred.</b>\n\nPlease restart the setup by entering your temptaking URL:\n\n<i>Format:</i>\n<pre>temptaking.ado.sg/group/&lt;code&gt;</pre>",
   "clocks": ["🕛", "🕧", "🕐", "🕜", "🕑", "🕝", "🕒", "🕞", "🕓", "🕟", "🕔", "🕠", "🕕", "🕡", "🕖", "🕢", "🕗", "🕣", "🕘", "🕤", "🕙", "🕥", "🕚", "🕦"]
 }

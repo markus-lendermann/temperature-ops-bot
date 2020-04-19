@@ -4,6 +4,18 @@ import re
 from timeit import default_timer as timer
 from datetime import datetime, timedelta
 
+status = "endgame 2"
+status = "offline,{}".format(status)
+
+print(status.startswith("offline"))
+print(status)
+
+if status.startswith("offline"):
+    status = status.split(",")[1]
+
+print(status)
+
+
 
 def loadStrings():
     with open("strings.json", encoding="utf-8") as tf:
@@ -28,13 +40,6 @@ def strftime(datetimeobject, formatstring):
     return formatstring.replace("percent_placeholder", "%")
 
 
-# def emojiTime(now):
-#     hour = now.hour
-#     minute = now.minute
-#     clocks = ["🕛", "🕧", "🕐", "🕜", "🕑", "🕝", "🕒", "🕞", "🕓", "🕟", "🕔", "🕠", "🕕", "🕡", "🕖", "🕢", "🕗", "🕣", "🕘", "🕤", "🕙", "🕥", "🕚", "🕦"]
-#
-#     return clocks[round(2*(hour + minute/60) % 24)]
-
 strings = loadStrings()
 
 now = datetime.now()
@@ -45,5 +50,10 @@ memberName = "Shawn"
 memberId = "298347"
 pin = "1234"
 
-msg = strftime(now, strings["already_submitted_PM"].format("35.9") + strings["old_user_PM"])
+print(strftime(now, "%H:%M"))
+print(str(datetime.now()))
+
+msg = strings["remind_delayed"] + strftime(now, strings["window_open_AM"])
+# msg = strftime(now, strings["remind_offline"])
+# msg = strftime(now, strings["status_online"])
 print(sendBroadcast(msg))
