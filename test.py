@@ -17,6 +17,14 @@ print(status)
 
 
 
+def loadTokens():
+    with open("tokensv2.json", encoding="utf-8") as tf:
+        tokens = json.load(tf)
+
+    return tokens
+
+
+
 def loadStrings():
     with open("strings.json", encoding="utf-8") as tf:
         strings = json.load(tf)
@@ -26,7 +34,7 @@ def loadStrings():
 
 def sendBroadcast(msg):
     print(msg)
-    r = requests.post('https://tempbotv2.ey.r.appspot.com/broadcast', json={"msg": msg})
+    r = requests.post('{}{}/broadcast'.format(tokens["project-url"], tokens["telegram-bot"]), json={"msg": msg})
     return r.text
 
 
@@ -40,6 +48,7 @@ def strftime(datetimeobject, formatstring):
     return formatstring.replace("percent_placeholder", "%")
 
 
+tokens = loadTokens()
 strings = loadStrings()
 
 now = datetime.now()

@@ -7,4 +7,4 @@ Hosted on [Google Cloud Platform](https://cloud.google.com/appengine) with pytho
 Deployed version accessible [here](http://t.me/temperature_ops_bot)
 
 
-This is **not** an auto-submit bot. *Any modification of this code to aid in automatic submission without prior measurement of temperatures is not condoned by its authors.*
+This is **not** an auto-submit bot. *Submission without prior measurement of temperatures is not condoned by its authors.*

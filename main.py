@@ -61,6 +61,10 @@ with ndb_client.context():
     wstatus = WebsiteStatus.get_or_insert('status')
 
 
+def getRouteUrl(url):
+    return '/{}/{}'.format(tokens["telegram-bot"], url)
+
+
 def generateTemperatures():
     return [[str(x / 10), str((x + 1) / 10)] for x in range(355, 375, 2)]
 
@@ -106,15 +110,15 @@ def submitTemp(client, temp):
     return r.text
 
 
-@app.route('/me')
+@app.route(getRouteUrl("me"))
 def getMe():
     resp = telegramApi.getMe()
     return resp["result"]
 
 
-@app.route('/setWebhook')
+@app.route(getRouteUrl("setWebhook"))
 def getWebhook():
-    url = tokens["project-url"] + "webhook"
+    url = tokens["project-url"] + "{}/webhook".format(tokens["telegram-bot"])
     resp = telegramApi.setWebhook(url)
     if resp["ok"]:
         return "webhook has been set to " + url
@@ -123,7 +127,7 @@ def getWebhook():
 
 
 # # for debugging purposes
-# @app.route('/flipSwitch')
+# @app.route(getRouteUrl("flipSwitch"))
 # def flipSwitch():
 #     with ndb_client.context():
 #         wstatus = WebsiteStatus.get_or_insert('status')
@@ -135,7 +139,7 @@ def getWebhook():
 #         return wstatus.url
 
 
-@app.route('/websiteStatus')
+@app.route(getRouteUrl("websiteStatus"))
 def websiteStatus(context=None):
     def websiteStatus():
         wstatus = WebsiteStatus.get_or_insert('status')
@@ -172,6 +176,7 @@ def websiteStatus(context=None):
             return "offline"
         else:
             return "online"
+
     if context:
         resp = websiteStatus()
     else:
@@ -180,8 +185,7 @@ def websiteStatus(context=None):
     return resp
 
 
-
-@app.route('/remind')
+@app.route(getRouteUrl("remind"))
 def remind(context=None):
     def remind():
         wstatus = WebsiteStatus.get_or_insert('status')
@@ -254,6 +258,7 @@ def remind(context=None):
                     i += 1
                 client.put()
             return 'reminder sent to {} clients'.format(i)
+
     if context:
         resp = remind()
     else:
@@ -262,7 +267,7 @@ def remind(context=None):
     return resp
 
 
-@app.route('/broadcast', methods=["POST"])
+@app.route(getRouteUrl("broadcast"), methods=["POST"])
 def broadcast():
     with ndb_client.context():
         all_clients = Client.query().fetch(keys_only=True)
@@ -277,7 +282,7 @@ def broadcast():
         return 'broadcast sent to ' + str(len(all_clients)) + ' clients'
 
 
-@app.route('/webhook', methods=["POST"])
+@app.route(getRouteUrl("webhook"), methods=["POST"])
 def webhook():
     with ndb_client.context():
         body = request.get_json()
