@@ -49,5 +49,5 @@
   "invalid_input": "\uD83D\uDC7A <b>This isn't a valid request.</b>\n\nWake up your idea.",
   "temp_submit_error": "<b>An unknown error occurred while submitting your temperature.</b>\n\nYou can try using <a href=\"https://temptaking.ado.sg/group/{}\">the website</a> to submit your temperature.\n\n<i>To try re-submitting, enter /forcesubmit.\nTo reset this bot at any time, enter /start.</i>",
   "fatal_error": "\uD83D\uDC80 <b>A fatal error occurred.</b>\n\nPlease restart the setup by entering your temptaking URL:\n\n<i>Format:</i>\n<pre>temptaking.ado.sg/group/&lt;code&gt;</pre>",
-  "clocks": ["🕛", "🕧", "🕐", "🕜", "🕑", "🕝", "🕒", "🕞", "🕓", "🕟", "🕔", "🕠", "🕕", "🕡", "🕖", "🕢", "🕗", "🕣", "🕘", "🕤", "🕙", "🕥", "🕚", "🕦"]
+  "clocks": ["🕛", "🕧", "🕐", "🕜", "🕑", "🕝", "🕒", "🕞", "🕓", "🕟", "🕔", "🕠", "🕕", "🕡", "🕖", "🕢", "🕗", "🕣", "🕘", "🕤", "🕙", "🕥", "🕚", "🕦", "🕛"]
 }

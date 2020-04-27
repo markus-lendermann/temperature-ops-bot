@@ -54,15 +54,19 @@ strings = loadStrings()
 now = datetime.now()
 
 
-groupName = "BMTC SCH 1"
-memberName = "Shawn"
-memberId = "298347"
-pin = "1234"
+# groupName = "BMTC SCH 1"
+# memberName = "Shawn"
+# memberId = "298347"
+# pin = "1234"
+#
+# print(strftime(now, "%H:%M"))
+# print(str(datetime.now()))
+#
+# msg = strings["remind_delayed"] + strftime(now, strings["window_open_AM"])
+# # msg = strftime(now, strings["remind_offline"])
+# # msg = strftime(now, strings["status_online"])
+# print(sendBroadcast(msg))
 
-print(strftime(now, "%H:%M"))
-print(str(datetime.now()))
-
-msg = strings["remind_delayed"] + strftime(now, strings["window_open_AM"])
-# msg = strftime(now, strings["remind_offline"])
-# msg = strftime(now, strings["status_online"])
-print(sendBroadcast(msg))
+hour = now.hour
+minute = now.minute
+print(round(2 * (hour + minute / 60) % 24))

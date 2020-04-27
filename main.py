@@ -104,6 +104,8 @@ def submitTemp(client, temp):
             'pin': client.pin
         }
         r = requests.post(url, data=payload)
+        logging.info('submit temp response:')
+        logging.info(r.text)
     except:
         # TODO: proper exception handling has to be done tbh
         return 'error'
@@ -159,7 +161,9 @@ def websiteStatus(context=None):
                             'text': strings["status_online"],
                             'parse_mode': 'HTML'
                         }
-                        telegramApi.sendMessage(payload)
+                        resp = telegramApi.sendMessage(payload)
+                        logging.info('websiteStatus send response:')
+                        logging.info(resp)
                         client.put()
                         i += 1
                 # update wstatus
@@ -213,7 +217,9 @@ def remind(context=None):
                                 "one_time_keyboard": True
                             }
                         }
-                        telegramApi.sendMessage(payload)
+                        resp = telegramApi.sendMessage(payload)
+                        logging.info('remindOffline send response:')
+                        logging.info(resp)
                         client.status = 'endgame 2'
                         i += 1
                     client.put()
@@ -253,7 +259,9 @@ def remind(context=None):
                             "one_time_keyboard": True
                         }
                     }
-                    telegramApi.sendMessage(payload)
+                    resp = telegramApi.sendMessage(payload)
+                    logging.info('remind send response:')
+                    logging.info(resp)
                     client.status = 'endgame 2'
                     i += 1
                 client.put()
@@ -270,16 +278,32 @@ def remind(context=None):
 @app.route(getRouteUrl("broadcast"), methods=["POST"])
 def broadcast():
     with ndb_client.context():
-        all_clients = Client.query().fetch(keys_only=True)
-        for client in all_clients:
-            key_id = client.id()
-            payload = {
-                'chat_id': str(key_id),
-                'text': request.get_json()['msg'],
-                'parse_mode': 'HTML'
-            }
-            telegramApi.sendMessage(payload)
-        return 'broadcast sent to ' + str(len(all_clients)) + ' clients'
+        try:
+            id_list = request.get_json()['ids']
+            for key_id in id_list:
+                payload = {
+                    'chat_id': str(key_id),
+                    'text': request.get_json()['msg'],
+                    'parse_mode': 'HTML'
+                }
+                resp = telegramApi.sendMessage(payload)
+                logging.info('broadcast response for {}:'.format(str(key_id)))
+                logging.info(resp)
+            return 'broadcast sent to {} clients'.format(str(len(id_list)))
+        except:
+            all_clients = Client.query().fetch(keys_only=True)
+            for client in all_clients:
+                key_id = client.id()
+                payload = {
+                    'chat_id': str(key_id),
+                    'text': request.get_json()['msg'],
+                    'parse_mode': 'HTML'
+                }
+                resp = telegramApi.sendMessage(payload)
+                logging.info('broadcast response for {}:'.format(str(key_id)))
+                logging.info(resp)
+            return 'broadcast sent to {} clients'.format(str(len(all_clients)))
+
 
 
 @app.route(getRouteUrl("webhook"), methods=["POST"])
@@ -354,6 +378,30 @@ def webhook():
                 resp = None
             logging.info('send response:')
             logging.info(resp)
+
+        # message specific person only
+        def messageMe(chat_id_list, msg=None, markup=None):
+            for id in chat_id_list:
+                if msg:
+                    if markup:
+                        payload = {
+                            'chat_id': id,
+                            'text': msg,
+                            'reply_markup': markup,
+                            'parse_mode': 'HTML'
+                        }
+                    else:
+                        payload = {
+                            'chat_id': id,
+                            'text': msg,
+                            'parse_mode': 'HTML'
+                        }
+                    resp = telegramApi.sendMessage(payload)
+                else:
+                    logging.error('no msg specified')
+                    resp = None
+                logging.info('messageMe() send response:'.format(id))
+                logging.info(resp)
 
         def setGroupId(client, group_url):
             group_string = 'temptaking.ado.sg/group'
@@ -716,6 +764,8 @@ def webhook():
                     message(strftime(now, strings["new_user_AM"]))
                 else:
                     message(strftime(now, strings["new_user_PM"]))
+                    # inform myself of new user
+                messageMe(tokens["admin-id"], strings["setup_summary"].format(client.groupName, client.memberName, ""))
                 return response
             else:
                 if now.hour < 12:
