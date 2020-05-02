@@ -16,7 +16,7 @@ logging.basicConfig(
 
 # load private API tokens from file
 def loadTokens():
-    with open("tokens.json") as tf:
+    with open("tokensv2.json") as tf:
         tokens = json.load(tf)
 
     return tokens
@@ -46,6 +46,14 @@ class Client(ndb.Model):
     memberId = ndb.StringProperty()
     pin = ndb.StringProperty()
     temp = ndb.StringProperty()
+    remindAM = ndb.IntegerProperty(default=-1)
+    remindPM = ndb.IntegerProperty(default=-1)
+
+    def reset(self):
+        self.status = '1'
+        self.temp = 'init'
+        self.remindAM = -1
+        self.remindPM = -1
 
 
 app = Flask(__name__)
@@ -57,6 +65,8 @@ telegramApi = TelegramApiWrapper(tokens["telegram-bot"])
 
 #  this context will be used for the entire app instance
 ndb_client = ndb.Client()
+
+#  check website status when initializing
 with ndb_client.context():
     wstatus = WebsiteStatus.get_or_insert('status')
 
@@ -67,6 +77,13 @@ def getRouteUrl(url):
 
 def generateTemperatures():
     return [[str(x / 10), str((x + 1) / 10)] for x in range(355, 375, 2)]
+
+
+def generateHours(hour):
+    if hour < 12:
+        return [[f'{2*x:02}:01', f'{2*x+1:02}:01'] for x in range(6)]
+    else:
+        return [[f'{2*x:02}:01', f'{2*x+1:02}:01'] for x in range(6, 12)]
 
 
 def emojiTime(now):
@@ -170,7 +187,7 @@ def websiteStatus(context=None):
                 wstatus.status = True
                 if wstatus.skippedReminder:
                     remind(True)
-                    wstatus.skippedReminder = False
+                    wstatus.skippedReminder = False  # only update this after calling remind()
                 wstatus.put()
                 return "message sent to {} clients".format(str(i))
         except:
@@ -206,22 +223,23 @@ def remind(context=None):
                             if client.temp != 'error':
                                 client.temp = 'none'
                     if client.temp == 'none':
-                        temperatures = generateTemperatures()
-                        text = strftime(now, strings["remind_offline"])
-                        payload = {
-                            'chat_id': str(key_id),
-                            'text': text,
-                            "parse_mode": "HTML",
-                            'reply_markup': {
-                                "keyboard": temperatures,
-                                "one_time_keyboard": True
+                        if (12 > now.hour >= client.remindAM) or (now.hour >= 12 and now.hour >= client.remindPM):
+                            temperatures = generateTemperatures()
+                            text = strftime(now, strings["remind_offline"])
+                            payload = {
+                                'chat_id': str(key_id),
+                                'text': text,
+                                "parse_mode": "HTML",
+                                'reply_markup': {
+                                    "keyboard": temperatures,
+                                    "one_time_keyboard": True
+                                }
                             }
-                        }
-                        resp = telegramApi.sendMessage(payload)
-                        logging.info('remindOffline send response:')
-                        logging.info(resp)
-                        client.status = 'endgame 2'
-                        i += 1
+                            resp = telegramApi.sendMessage(payload)
+                            logging.info('remindOffline send response:')
+                            logging.info(resp)
+                            client.status = 'endgame 2'
+                            i += 1
                     client.put()
                 wstatus.skippedReminder = True
                 wstatus.put()
@@ -239,31 +257,32 @@ def remind(context=None):
                         if client.temp != 'error':
                             client.temp = 'none'
                 if client.temp == 'none':
-                    temperatures = generateTemperatures()
-                    if now.hour < 12:
-                        if wstatus.skippedReminder:
-                            text = strings["remind_delayed"] + strftime(now, strings["window_open_AM"])
+                    if (12 > now.hour >= client.remindAM) or (now.hour >= 12 and now.hour >= client.remindPM):
+                        temperatures = generateTemperatures()
+                        if now.hour < 12:
+                            if wstatus.skippedReminder:
+                                text = strings["remind_delayed"] + strftime(now, strings["window_open_AM"])
+                            else:
+                                text = strftime(now, strings["window_open_AM"])
                         else:
-                            text = strftime(now, strings["window_open_AM"])
-                    else:
-                        if wstatus.skippedReminder:
-                            text = strings["remind_delayed"] + strftime(now, strings["window_open_PM"])
-                        else:
-                            text = strftime(now, strings["window_open_PM"])
-                    payload = {
-                        'chat_id': str(key_id),
-                        'text': text,
-                        "parse_mode": "HTML",
-                        'reply_markup': {
-                            "keyboard": temperatures,
-                            "one_time_keyboard": True
+                            if wstatus.skippedReminder:
+                                text = strings["remind_delayed"] + strftime(now, strings["window_open_PM"])
+                            else:
+                                text = strftime(now, strings["window_open_PM"])
+                        payload = {
+                            'chat_id': str(key_id),
+                            'text': text,
+                            "parse_mode": "HTML",
+                            'reply_markup': {
+                                "keyboard": temperatures,
+                                "one_time_keyboard": True
+                            }
                         }
-                    }
-                    resp = telegramApi.sendMessage(payload)
-                    logging.info('remind send response:')
-                    logging.info(resp)
-                    client.status = 'endgame 2'
-                    i += 1
+                        resp = telegramApi.sendMessage(payload)
+                        logging.info('remind send response:')
+                        logging.info(resp)
+                        client.status = 'endgame 2'
+                        i += 1
                 client.put()
             return 'reminder sent to {} clients'.format(i)
 
@@ -444,8 +463,7 @@ def webhook():
         if text.startswith('/'):
             if text == '/start':
                 message(strings["SAF100"])
-                client.status = '1'
-                client.temp = 'init'
+                client.reset()
                 client.put()
                 return response
             elif text == '/forcesubmit':
@@ -464,7 +482,25 @@ def webhook():
                     client.status = 'endgame 2'
                     client.put()
                     return response
+            elif text == '/remind':
+                if client.status == 'endgame 1':
+                    hours = generateHours(0)
+                    if client.remindAM == -1:
+                        msg = strings["reminder_not_configured"] + strings["reminder_change_config"].format("AM")
+                    else:
+                        msg = strings["reminder_existing_config"].format(
+                            f'{client.remindAM:02}:01', f'{client.remindPM:02}:01'
+                        ) + strings["reminder_change_config"].format("AM")
+                    markup = {
+                        "keyboard": hours,
+                        "one_time_keyboard": True
+                    }
+                    message(msg, markup)
+                    client.status = 'remind wizard 1'
+                    client.put()
+                    return response
             reply(strings["invalid_input"])
+            return response
 
         elif client.status == '1':
             group_url = text
@@ -659,8 +695,7 @@ def webhook():
                     except ValueError:
                         # user is probably trying to break the bot
                         message(strings["fatal_error"])
-                        client.status = '1'
-                        client.temp = 'init'
+                        client.reset()
                         client.put()
                 return response
             else:
@@ -718,16 +753,21 @@ def webhook():
                 markup = {
                     "keyboard": [
                         [
-                            strings["summary_keyboard_yes"],
+                            strings["summary_keyboard_yes"]
+                        ],
+                        [
                             strings["summary_keyboard_no"]
                         ]
                     ],
                     "one_time_keyboard": True
                 }
                 message(msg, markup)
-                client.status = 'endgame 1'
+                client.status = '7'
                 client.groupMembers = ''  # flush datastore
                 client.put()
+                # inform myself of new user
+                messageMe(tokens["admin-id"], strings["setup_summary"].format(
+                    client.groupName, client.memberName, "XXXX"))
                 return response
             elif text == strings["pin_keyboard_no"]:
                 message(strings["pin_msg_3"])
@@ -750,23 +790,54 @@ def webhook():
                 message(msg, markup)
                 return response
 
-        elif client.status == 'endgame 1':
-            now = datetime.now() + timedelta(hours=8)
+        elif client.status == '7':
             if text == strings["summary_keyboard_no"]:
                 message(strings["SAF100"])
-                client.status = '1'
-                client.temp = 'init'
+                client.reset()
                 client.put()
                 return response
-            # if the user doesn't enter summary_keyboard_no, we just assume they want to proceed
-            if client.temp == 'init':
-                if now.hour < 12:
-                    message(strftime(now, strings["new_user_AM"]))
-                else:
-                    message(strftime(now, strings["new_user_PM"]))
-                    # inform myself of new user
-                messageMe(tokens["admin-id"], strings["setup_summary"].format(client.groupName, client.memberName, ""))
+            elif text == strings["summary_keyboard_yes"]:
+                hours = generateHours(0)
+                msg = strings["reminder_not_configured"] + strings["reminder_change_config"].format("AM")
+                markup = {
+                    "keyboard": hours,
+                    "one_time_keyboard": True
+                }
+                message(msg, markup)
+                client.status = 'remind wizard 1'
+                client.put()
                 return response
+            else:
+                msg = strings["use_keyboard"]
+                markup = {
+                    "keyboard": [
+                        [
+                            strings["summary_keyboard_yes"]
+                        ],
+                        [
+                            strings["summary_keyboard_no"]
+                        ]
+                    ],
+                    "one_time_keyboard": True
+                }
+                message(msg, markup)
+                return response
+
+        elif client.status == 'endgame 1':
+            now = datetime.now() + timedelta(hours=8)
+            if client.temp == 'none':
+                temperatures = generateTemperatures()
+                if now.hour < 12:
+                    msg = strftime(now, strings["window_open_AM"])
+                else:
+                    msg = strftime(now, strings["window_open_PM"])
+                markup = {
+                    "keyboard": temperatures,
+                    "one_time_keyboard": True
+                }
+                message(msg, markup)
+                client.status = 'endgame 2'
+                client.put()
             else:
                 if now.hour < 12:
                     message((strftime(now,
@@ -885,6 +956,60 @@ def webhook():
                 }
                 message(msg, markup)
                 return response
+        elif client.status == 'remind wizard 1':
+            if text not in [f'{x:02}:01' for x in range(12)]:
+                hours = generateHours(0)
+                msg = strings["invalid_reminder_time"]
+                markup = {
+                    "keyboard": hours,
+                    "one_time_keyboard": True
+                }
+                reply(msg, markup)
+            else:
+                client.remindAM = int(text[:2])
+                msg = strings["reminder_change_config"].format("PM")
+                hours = generateHours(12)
+                markup = {
+                    "keyboard": hours,
+                    "one_time_keyboard": True
+                }
+                message(msg, markup)
+                client.status = 'remind wizard 2'
+                client.put()
+            return response
+
+        elif client.status == 'remind wizard 2':
+            if text not in [f'{x:02}:01' for x in range(12,24)]:
+                hours = generateHours(12)
+                msg = strings["invalid_reminder_time"]
+                markup = {
+                    "keyboard": hours,
+                    "one_time_keyboard": True
+                }
+                reply(msg, markup)
+            else:
+                client.remindPM = int(text[:2])
+                msg = strings["reminder_successful_change"].format(
+                    f'{client.remindAM:02}:01', f'{client.remindPM:02}:01')
+                message(msg)
+                client.status = 'endgame 1'
+                if client.temp == 'init':
+                    client.temp = 'none'
+                    now = datetime.now() + timedelta(hours=8)
+                    temperatures = generateTemperatures()
+                    if now.hour < 12:
+                        msg = strftime(now, strings["window_open_AM"])
+                    else:
+                        msg = strftime(now, strings["window_open_PM"])
+                    markup = {
+                        "keyboard": temperatures,
+                        "one_time_keyboard": True
+                    }
+                    message(msg, markup)
+                    client.status = 'endgame 2'
+                client.put()
+            return response
+
         else:
             reply(strings["invalid_input"])
         return response

@@ -62,11 +62,27 @@ now = datetime.now()
 # print(strftime(now, "%H:%M"))
 # print(str(datetime.now()))
 #
-# msg = strings["remind_delayed"] + strftime(now, strings["window_open_AM"])
-# # msg = strftime(now, strings["remind_offline"])
-# # msg = strftime(now, strings["status_online"])
-# print(sendBroadcast(msg))
+# msg = strings["reminder_existing_config"].format("00:01", "12:01") + strings["reminder_change_config"].format("AM")
+#
+msg = strings["reminder_successful_change"]
+print(sendBroadcast(msg))
 
-hour = now.hour
-minute = now.minute
-print(round(2 * (hour + minute / 60) % 24))
+#
+# print(f'{0:02}')
+#
+# print([[f'{2*x:02}:01', f'{2*x+1:02}:01'] for x in range(6)])
+# print([[f'{2*x:02}:01', f'{2*x+1:02}:01'] for x in range(6, 12)])
+# print(now.hour < 12)
+
+p = re.compile(r'\d{2}:01$').match("13:0")
+print(p)
+
+print("00:01" in [f'{x:02}:01' for x in range(12,24)])
+
+print(int("00:01"[:2]))
+
+print(f'{1:02}:01')
+
+print([f'{x:02}:01' for x in range(12,24)])
+
+print(f'{max(-1,12):02}:01')
