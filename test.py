@@ -64,7 +64,7 @@ now = datetime.now()
 #
 # msg = strings["reminder_existing_config"].format("00:01", "12:01") + strings["reminder_change_config"].format("AM")
 #
-msg = strings["reminder_successful_change"]
+msg = "test"
 print(sendBroadcast(msg))
 
 #
