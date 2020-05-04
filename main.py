@@ -222,6 +222,7 @@ def remind(context=None):
                         if client.status == 'endgame 1' or client.status == 'endgame 2':
                             if client.temp != 'error':
                                 client.temp = 'none'
+                                client.status = 'endgame 2'
                     if client.temp == 'none':
                         if (12 > now.hour >= client.remindAM) or (now.hour >= 12 and now.hour >= client.remindPM):
                             temperatures = generateTemperatures()
