@@ -36,8 +36,6 @@
   "setup_summary": "✅ <b>Setup completed</b>\n\nGroup: <b>{}</b>\nName: <b>{}</b>\nPin: <b>{}</b>",
   "summary_keyboard_yes": "Looks good",
   "summary_keyboard_no": "Restart setup",
-  "new_user_AM": "<i>It's %H:%M on %A, %d/%m/%y</i>\nAs a new user, <b>you can start submitting temperatures this afternoon.</b>\n\nYou will be reminded (hourly, until you submit) to submit your temperature <b>from {} onwards.</b>\n\n<i>To submit for the current window anyway, enter /forcesubmit\nTo reset this bot, enter /start\nTo configure reminders, enter /remind</i>",
-  "new_user_PM": "<i>It's %H:%M on %A, %d/%m/%y</i>\nAs a new user, <b>you can start submitting temperatures tomorrow morning.</b>\n\nYou will be reminded (hourly, until you submit) to submit your temperature <b>from {} onwards.</b>\n\n<i>To submit for the current window anyway, enter /forcesubmit\nTo reset this bot, enter /start\nTo configure reminders, enter /remind</i>",
   "already_submitted_AM": "<b><i>%A, %d/%m/%y — AM</i></b>\n\n✅ You already submitted <b>{}°C</b>\n\nYour next submission window opens this afternoon.\n\n",
   "already_submitted_PM": "<b><i>%A, %d/%m/%y — PM</i></b>\n\n✅ You already submitted <b>{}°C</b>\n\nYour next submission window opens tomorrow morning.\n\n",
   "just_submitted_AM": "<b><i>%A, %d/%m/%y — AM</i></b>\n\n<b>{} %H:%M\n\uD83C\uDF21 {}°C</b>\n\n✅ Submitted successfully\n\n",

@@ -64,7 +64,7 @@ now = datetime.now()
 #
 # msg = strings["reminder_existing_config"].format("00:01", "12:01") + strings["reminder_change_config"].format("AM")
 #
-msg = "test"
+msg = ""
 print(sendBroadcast(msg))
 
 #
@@ -77,12 +77,4 @@ print(sendBroadcast(msg))
 p = re.compile(r'\d{2}:01$').match("13:0")
 print(p)
 
-print("00:01" in [f'{x:02}:01' for x in range(12,24)])
-
-print(int("00:01"[:2]))
-
-print(f'{1:02}:01')
-
-print([f'{x:02}:01' for x in range(12,24)])
-
-print(f'{max(-1,12):02}:01')
+print([[str(x / 10), str((x + 1) / 10)] for x in range(350, 400, 2)])
