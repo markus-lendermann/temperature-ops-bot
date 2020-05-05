@@ -16,7 +16,7 @@ logging.basicConfig(
 
 # load private API tokens from file
 def loadTokens():
-    with open("tokensv2.json") as tf:
+    with open("tokens.json") as tf:
         tokens = json.load(tf)
 
     return tokens
@@ -62,6 +62,7 @@ logger = logging.getLogger(__name__)
 tokens = loadTokens()
 strings = loadStrings()
 telegramApi = TelegramApiWrapper(tokens["telegram-bot"])
+valid_command_states = ['endgame 1', 'endgame 2', 'remind wizard 1', 'remind wizard 2']
 
 #  this context will be used for the entire app instance
 ndb_client = ndb.Client()
@@ -469,7 +470,7 @@ def webhook():
                 client.put()
                 return response
             elif text == '/forcesubmit':
-                if client.status == 'endgame 1':
+                if client.status in valid_command_states:
                     now = datetime.now() + timedelta(hours=8)
                     temperatures = generateTemperatures()
                     if now.hour < 12:
@@ -485,7 +486,7 @@ def webhook():
                     client.put()
                     return response
             elif text == '/remind':
-                if client.status == 'endgame 1':
+                if client.status in valid_command_states:
                     hours = generateHours(0)
                     if client.remindAM == -1:
                         msg = strings["reminder_not_configured"] + strings["reminder_change_config"].format("AM")
