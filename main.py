@@ -220,7 +220,7 @@ def remind(context=None):
                     client = client.get()
                     now = datetime.now() + timedelta(hours=8)
                     if now.hour == 0 or now.hour == 12:
-                        if client.status == 'endgame 1' or client.status == 'endgame 2':
+                        if client.status in valid_command_states:
                             if client.temp != 'error':
                                 client.temp = 'none'
                                 client.status = 'endgame 2'
@@ -255,7 +255,7 @@ def remind(context=None):
                 client = client.get()
                 now = datetime.now() + timedelta(hours=8)
                 if now.hour == 0 or now.hour == 12:
-                    if client.status == 'endgame 1' or client.status == 'endgame 2':
+                    if client.status in valid_command_states:
                         if client.temp != 'error':
                             client.temp = 'none'
                             client.status = 'endgame 2'
@@ -488,7 +488,7 @@ def webhook():
             elif text == '/remind':
                 if client.status in valid_command_states:
                     hours = generateHours(0)
-                    if client.remindAM == -1:
+                    if client.remindAM == -1 or client.remindPM == -1:
                         msg = strings["reminder_not_configured"] + strings["reminder_change_config"].format("AM")
                     else:
                         msg = strings["reminder_existing_config"].format(
