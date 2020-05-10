@@ -426,7 +426,7 @@ def webhook():
                 logging.info(resp)
 
         def setGroupId(client, group_url):
-            group_string = 'temptaking.ado.sg/group'
+            group_string = 'temptaking.ado.sg/group/'
             if group_url.startswith(group_string):
                 group_url = 'https://' + group_url
             if group_url.startswith('https://' + group_string) or group_url.startswith('http://' + group_string):
