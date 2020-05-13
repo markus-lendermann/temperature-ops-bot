@@ -440,7 +440,10 @@ def webhook():
                 def urlParse(text):
                     return text[text.find('{'):text.rfind('}') + 1]
 
-                parsed_url = json.loads(urlParse(req_text))
+                try:
+                    parsed_url = json.loads(urlParse(req_text))
+                except:
+                    return -1
                 client.groupName = parsed_url["groupName"]
                 client.groupId = parsed_url["groupCode"]
                 client.groupMembers = json.dumps(parsed_url["members"])
