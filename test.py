@@ -52,8 +52,8 @@ now = datetime.now()
 #
 # msg = strings["reminder_existing_config"].format("00:01", "12:01") + strings["reminder_change_config"].format("AM")
 #
-# msg = ""
-# print(sendBroadcast(msg))
+# msg = "Dear all,\n\nAs the number of users rises, <b>the limits imposed on us by Telegram may result in your hourly submission reminders being delayed by up to a few minutes</b> in order to balance the traffic load.\n\nWe are trying to work around these limits and hopefully will have an upgraded version of the bot running soon. In the meantime, thanks for your understanding & patience."
+print(sendBroadcast(msg))
 
 #
 # print(f'{0:02}')
@@ -62,5 +62,5 @@ now = datetime.now()
 # print([[f'{2*x:02}:01', f'{2*x+1:02}:01'] for x in range(6, 12)])
 # print(now.hour < 12)
 
-valid_states = ['endgame 1', 'endgame 2', 'remind wizard 1', 'remind wizard 2']
-print('endgame 1' in valid_states)
+# valid_states = ['endgame 1', 'endgame 2', 'remind wizard 1', 'remind wizard 2']
+# print('endgame 1' in valid_states)

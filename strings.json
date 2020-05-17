@@ -51,6 +51,6 @@
   "reminder_not_configured": "<b>You haven't configured your reminders yet.</b>\n\nBy default, hourly submission reminders begin at 00:01 and 12:01 daily.\n\n<b>To reduce spam, you can customise the time from which hourly reminders begin.</b>\n\n",
   "reminder_existing_config": "<b>Existing reminder configuration:</b>\n\nAM: <b>{} onwards</b>\nPM: <b>{} onwards</b>\n\n",
   "reminder_change_config": "<i>Please enter your desired {} reminder time</i>:",
-  "reminder_successful_change": "✅ <b>Reminders configured</b>\n\nAM: <b>{} onwards</b>\nPM: <b>{} onwards</b>",
+  "reminder_successful_change": "✅ <b>Reminders configured</b>\n\nAM: <b>{} onwards</b>\nPM: <b>{} onwards</b>\n\n<i>Disclaimer: Due to high user volume, reminders may be delayed by up to a few minutes.</i>",
   "invalid_reminder_time": "❌ <b>This isn't a valid time.</b>\n\n<i>Please use one of the options generated for you:</i>"
 }
