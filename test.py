@@ -52,7 +52,7 @@ now = datetime.now()
 #
 # msg = strings["reminder_existing_config"].format("00:01", "12:01") + strings["reminder_change_config"].format("AM")
 #
-# msg = "Dear all,\n\nAs the number of users rises, <b>the limits imposed on us by Telegram may result in your hourly submission reminders being delayed by up to a few minutes</b> in order to balance the traffic load.\n\nWe are trying to work around these limits and hopefully will have an upgraded version of the bot running soon. In the meantime, thanks for your understanding & patience."
+msg = ""
 print(sendBroadcast(msg))
 
 #

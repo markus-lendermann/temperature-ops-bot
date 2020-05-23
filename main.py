@@ -62,7 +62,8 @@ logger = logging.getLogger(__name__)
 tokens = loadTokens()
 strings = loadStrings()
 telegramApi = TelegramApiWrapper(tokens["telegram-bot"])
-valid_command_states = ['endgame 1', 'endgame 2', 'remind wizard 1', 'remind wizard 2']
+valid_command_states = ['endgame 1', 'endgame 2', 'remind wizard 1', 'remind wizard 2', 'offline,endgame 1',
+                        'offline,endgame 2', 'offline,remind wizard 1', 'offline,remind wizard 2']
 
 #  this context will be used for the entire app instance
 ndb_client = ndb.Client()
@@ -169,6 +170,9 @@ def websiteStatus(context=None):
                 # restore all client statuses to their original value before updating wstatus
                 all_clients = Client.query().fetch(keys_only=True)
                 i = 0
+                # update wstatus
+                wstatus.status = True
+                wstatus.put()
                 for client in all_clients:
                     key_id = client.id()
                     client = client.get()
@@ -184,14 +188,13 @@ def websiteStatus(context=None):
                         logging.info(resp)
                         client.put()
                         i += 1
-                # update wstatus
-                wstatus.status = True
                 if wstatus.skippedReminder:
                     remind(True)
                     wstatus.skippedReminder = False  # only update this after calling remind()
                 wstatus.put()
                 return "message sent to {} clients".format(str(i))
-        except:
+        except Exception as e:
+            logging.error(e)
             if wstatus.status:
                 wstatus.status = False
                 wstatus.put()
@@ -223,7 +226,7 @@ def remind(context=None):
                         if client.status in valid_command_states:
                             if client.temp != 'error':
                                 client.temp = 'none'
-                                client.status = 'endgame 2'
+                                client.status = 'offline,endgame 2'
                     if client.temp == 'none':
                         if (12 > now.hour >= client.remindAM) or (now.hour >= 12 and now.hour >= client.remindPM):
                             temperatures = generateTemperatures()
