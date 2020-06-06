@@ -48,6 +48,7 @@ class Client(ndb.Model):
     temp = ndb.StringProperty()
     remindAM = ndb.IntegerProperty(default=-1)
     remindPM = ndb.IntegerProperty(default=-1)
+    blocked = ndb.BooleanProperty(default=False)
 
     def reset(self):
         self.status = '1'
@@ -287,6 +288,9 @@ def remind(context=None):
                         resp = telegramApi.sendMessage(payload)
                         logging.info('remind send response:')
                         logging.info(resp)
+                        if not resp['ok']:
+                            if resp['description'] == 'Forbidden: bot was blocked by the user':
+                                client.blocked = True
                         client.status = 'endgame 2'
                         i += 1
                 client.put()
