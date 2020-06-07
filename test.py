@@ -52,19 +52,10 @@ now = datetime.now()
 #
 # msg = strings["reminder_existing_config"].format("00:01", "12:01") + strings["reminder_change_config"].format("AM")
 #
-# msg = ""
-# print(sendBroadcast(msg))
+msg = "<i>[Automated message]</i>\n\n<b>TELEGRAM BOT API IS UNSTABLE</b>\n\nTelegram servers may not be sending me all your messages currently. If I appear unresponsive, please try again later."
+print(sendBroadcast(msg))
 
 
-def test(c):
-    [a, b] = c
-    print("a is {}, b is {}".format(a, b))
-    return "ok"
-
-test(["a", "b"])
-
-
-print([None]*10)
 
 #
 # print(f'{0:02}')

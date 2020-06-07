@@ -442,7 +442,8 @@ def broadcast():
             payload = {
                 'chat_id': key_id,
                 'text': text,
-                'parse_mode': 'HTML'
+                'parse_mode': 'HTML',
+                'disable_web_page_preview': True
             }
             param_list[i] = [key_id, payload]
 
