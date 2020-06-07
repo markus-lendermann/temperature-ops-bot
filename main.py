@@ -570,7 +570,7 @@ def webhook():
                 group_url = 'https://' + group_url
             if group_url.startswith('https://' + group_string) or group_url.startswith('http://' + group_string):
                 try:
-                    req_text = str(requests.get(group_url).content)
+                    req_text = str(requests.get(group_url).content.decode('utf-8'))
                 except:
                     return 0
                 if 'Invalid code' in req_text:
