@@ -1,1 +1,4 @@
 runtime: python37
+instance_class: F1
+automatic_scaling:
+  max_instances: 2

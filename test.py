@@ -52,8 +52,19 @@ now = datetime.now()
 #
 # msg = strings["reminder_existing_config"].format("00:01", "12:01") + strings["reminder_change_config"].format("AM")
 #
-msg = ""
-print(sendBroadcast(msg))
+# msg = ""
+# print(sendBroadcast(msg))
+
+
+def test(c):
+    [a, b] = c
+    print("a is {}, b is {}".format(a, b))
+    return "ok"
+
+test(["a", "b"])
+
+
+print([None]*10)
 
 #
 # print(f'{0:02}')

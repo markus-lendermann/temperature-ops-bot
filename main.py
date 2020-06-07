@@ -6,6 +6,8 @@ import lib.requests as requests
 import re
 from datetime import datetime, timedelta
 from google.cloud import ndb
+from multiprocessing.pool import ThreadPool
+from time import time as timer
 
 # Configure logging
 logging.basicConfig(
@@ -32,7 +34,7 @@ def loadStrings():
 
 class WebsiteStatus(ndb.Model):
     status = ndb.BooleanProperty(default=True)
-    # url = ndb.StringProperty(default="https://temptaking.ado.sg")  # for debugging purposes
+    url = ndb.StringProperty(default="https://temptaking.ado.sg")  # for debugging purposes
     skippedReminder = ndb.BooleanProperty(default=False)
 
 
@@ -65,6 +67,7 @@ strings = loadStrings()
 telegramApi = TelegramApiWrapper(tokens["telegram-bot"])
 valid_command_states = ['endgame 1', 'endgame 2', 'remind wizard 1', 'remind wizard 2', 'offline,endgame 1',
                         'offline,endgame 2', 'offline,remind wizard 1', 'offline,remind wizard 2']
+THREAD_NUMBER = 20  # number of threads to create in /remind and /broadcast thread pools
 
 #  this context will be used for the entire app instance
 ndb_client = ndb.Client()
@@ -79,14 +82,14 @@ def getRouteUrl(url):
 
 
 def generateTemperatures():
-    return [[str(x / 10), str((x + 1) / 10)] for x in range(355, 375, 2)]
+    return [[str(x / 10), str((x + 1) / 10)] for x in range(350, 375, 2)]
 
 
 def generateHours(hour):
     if hour < 12:
-        return [[f'{2*x:02}:01', f'{2*x+1:02}:01'] for x in range(6)]
+        return [[f'{2 * x:02}:01', f'{2 * x + 1:02}:01'] for x in range(6)]
     else:
-        return [[f'{2*x:02}:01', f'{2*x+1:02}:01'] for x in range(6, 12)]
+        return [[f'{2 * x:02}:01', f'{2 * x + 1:02}:01'] for x in range(6, 12)]
 
 
 def emojiTime(now):
@@ -114,7 +117,7 @@ def submitTemp(client, temp):
     else:
         meridies = 'PM'
     try:
-        url = 'https://temptaking.ado.sg/group/MemberSubmitTemperature'
+        url = '{}/group/MemberSubmitTemperature'.format(wstatus.url)
         payload = {
             'groupCode': client.groupId,
             'date': strftime(now, '%d/%m/%Y'),
@@ -126,8 +129,9 @@ def submitTemp(client, temp):
         r = requests.post(url, data=payload)
         logging.info('submit temp response:')
         logging.info(r.text)
-    except:
+    except Exception as e:
         # TODO: proper exception handling has to be done tbh
+        logging.error(e)
         return 'error'
     return r.text
 
@@ -148,17 +152,17 @@ def getWebhook():
         return "webhook failed to set. DEBUG: " + str(resp)
 
 
-# # for debugging purposes
-# @app.route(getRouteUrl("flipSwitch"))
-# def flipSwitch():
-#     with ndb_client.context():
-#         wstatus = WebsiteStatus.get_or_insert('status')
-#         if wstatus.url == "https://temptaking.ado.sg":
-#             wstatus.url = "https://temptaking.ado.sgs"  # force website to appear offline
-#         else:
-#             wstatus.url = "https://temptaking.ado.sg"
-#         wstatus.put()
-#         return wstatus.url
+# for debugging purposes
+@app.route(getRouteUrl("flipSwitch"))
+def flipSwitch():
+    with ndb_client.context():
+        wstatus = WebsiteStatus.get_or_insert('status')
+        if wstatus.url == "https://temptaking.ado.sg":
+            wstatus.url = "https://temptaking.ado.sgs"  # force website to appear offline
+        else:
+            wstatus.url = "https://temptaking.ado.sg"
+        wstatus.put()
+        return wstatus.url
 
 
 @app.route(getRouteUrl("websiteStatus"))
@@ -166,34 +170,68 @@ def websiteStatus(context=None):
     def websiteStatus():
         wstatus = WebsiteStatus.get_or_insert('status')
         try:
-            requests.get("https://temptaking.ado.sg")
+            requests.get(wstatus.url)
             if not wstatus.status:
-                # restore all client statuses to their original value before updating wstatus
-                all_clients = Client.query().fetch(keys_only=True)
-                i = 0
+                def fetch_remind_response(client):
+                    with ndb_client.context():
+                        try:
+                            resp = "not sent"
+                            key_id = client.id()
+                            client = client.get()
+                            if client.status.startswith("offline"):
+                                client.status = client.status.split(",")[1]
+                                payload = {
+                                    'chat_id': str(key_id),
+                                    'text': strings["status_online"],
+                                    'parse_mode': 'HTML'
+                                }
+                                resp = telegramApi.sendMessage(payload)
+                                client.put()
+                            return client, str(key_id), resp, None
+                        except Exception as e:
+                            return client, str(client.id()), None, e
+
                 # update wstatus
                 wstatus.status = True
                 wstatus.put()
-                for client in all_clients:
-                    key_id = client.id()
-                    client = client.get()
-                    if client.status.startswith("offline"):
-                        client.status = client.status.split(",")[1]
-                        payload = {
-                            'chat_id': str(key_id),
-                            'text': strings["status_online"],
-                            'parse_mode': 'HTML'
-                        }
-                        resp = telegramApi.sendMessage(payload)
-                        logging.info('websiteStatus send response:')
-                        logging.info(resp)
-                        client.put()
-                        i += 1
+
+                all_clients = Client.query().fetch(keys_only=True)
+                start = timer()
+                remind_results = ThreadPool(THREAD_NUMBER).imap_unordered(fetch_remind_response, all_clients)
+                i = 0
+                p = 0
+                f = 0
+                b = 0
+
+                for client, key_id, resp, e in remind_results:
+                    if e is None:
+                        if resp != "not sent":
+                            i += 1
+                            if resp["ok"]:
+                                logging.info('websiteStatus response for {}: {}'.format(key_id, resp["result"]))
+                                p += 1
+                            else:
+                                logging.info('websiteStatus response for {}: {}'.format(key_id, resp["description"]))
+                                if resp["error_code"] == 403:
+                                    b += 1
+                                else:
+                                    f += 1
+                    else:
+                        logging.error(e)
+                        f += 1
+
                 if wstatus.skippedReminder:
                     remind(True)
                     wstatus.skippedReminder = False  # only update this after calling remind()
                 wstatus.put()
-                return "message sent to {} clients".format(str(i))
+
+                logging.info(
+                    'online notification sent to {} clients. '
+                    'successes: {} blocked: {} failures: {} elapsed time: {}'.format(
+                        str(i), str(p), str(b), str(f), str(timer() - start)))
+                return 'online notification sent to {} clients. ' \
+                       'successes: {} blocked: {} failures: {} elapsed time: {}'.format(
+                    str(i), str(p), str(b), str(f), str(timer() - start))
         except Exception as e:
             logging.error(e)
             if wstatus.status:
@@ -215,86 +253,153 @@ def websiteStatus(context=None):
 def remind(context=None):
     def remind():
         wstatus = WebsiteStatus.get_or_insert('status')
-        if not wstatus.status:
-            if not wstatus.skippedReminder:
-                all_clients = Client.query().fetch(keys_only=True)
-                i = 0
-                for client in all_clients:
-                    key_id = client.id()
-                    client = client.get()
-                    now = datetime.now() + timedelta(hours=8)
-                    if now.hour == 0 or now.hour == 12:
-                        if client.status in valid_command_states:
-                            if client.temp != 'error':
-                                client.temp = 'none'
-                                client.status = 'offline,endgame 2'
-                    if client.temp == 'none':
-                        if (12 > now.hour >= client.remindAM) or (now.hour >= 12 and now.hour >= client.remindPM):
-                            temperatures = generateTemperatures()
-                            text = strftime(now, strings["remind_offline"])
-                            payload = {
-                                'chat_id': str(key_id),
-                                'text': text,
-                                "parse_mode": "HTML",
-                                'reply_markup': {
-                                    "keyboard": temperatures,
-                                    "one_time_keyboard": True
+        if wstatus.status:
+            def fetch_remind_response(client):
+                with ndb_client.context():
+                    try:
+                        resp = "not sent"
+                        key_id = client.id()
+                        client = client.get()
+                        now = datetime.now() + timedelta(hours=8)
+                        if now.hour == 0 or now.hour == 12:
+                            if client.status in valid_command_states:
+                                if client.temp != 'error':
+                                    client.temp = 'none'
+                                    client.status = 'endgame 2'
+                        if client.temp == 'none':
+                            if (12 > now.hour >= client.remindAM) or (now.hour >= 12 and now.hour >= client.remindPM):
+                                temperatures = generateTemperatures()
+                                if now.hour < 12:
+                                    if wstatus.skippedReminder:
+                                        text = strings["remind_delayed"] + strftime(now, strings["window_open_AM"])
+                                    else:
+                                        text = strftime(now, strings["window_open_AM"])
+                                else:
+                                    if wstatus.skippedReminder:
+                                        text = strings["remind_delayed"] + strftime(now, strings["window_open_PM"])
+                                    else:
+                                        text = strftime(now, strings["window_open_PM"])
+                                payload = {
+                                    'chat_id': str(key_id),
+                                    'text': text,
+                                    "parse_mode": "HTML",
+                                    'reply_markup': {
+                                        "keyboard": temperatures,
+                                        "one_time_keyboard": True
+                                    }
                                 }
-                            }
-                            resp = telegramApi.sendMessage(payload)
-                            logging.info('remindOffline send response:')
-                            logging.info(resp)
-                            client.status = 'endgame 2'
+                                resp = telegramApi.sendMessage(payload)
+                                if not resp['ok']:
+                                    if resp['description'] == 'Forbidden: bot was blocked by the user':
+                                        client.blocked = True
+                                client.status = 'endgame 2'
+                        client.put()
+                        return client, str(key_id), resp, None
+                    except Exception as e:
+                        return client, str(client.id()), None, e
+
+            all_clients = Client.query().fetch(keys_only=True)
+            start = timer()
+            remind_results = ThreadPool(THREAD_NUMBER).imap_unordered(fetch_remind_response, all_clients)
+            i = 0
+            p = 0
+            f = 0
+            b = 0
+
+            for client, key_id, resp, e in remind_results:
+                if e is None:
+                    if resp != "not sent":
+                        i += 1
+                        if resp["ok"]:
+                            logging.info('remind response for {}: {}'.format(key_id, resp["result"]))
+                            p += 1
+                        else:
+                            logging.info('remind response for {}: {}'.format(key_id, resp["description"]))
+                            if resp["error_code"] == 403:
+                                b += 1
+                            else:
+                                f += 1
+                else:
+                    logging.error(e)
+                    f += 1
+
+            logging.info('reminder sent to {} clients. successes: {} blocked: {} failures: {} elapsed time: {}'.format(
+                str(i), str(p), str(b), str(f), str(timer() - start)))
+            return 'reminder sent to {} clients. successes: {} blocked: {} failures: {} elapsed time: {}'.format(
+                str(i), str(p), str(b), str(f), str(timer() - start))
+        else:
+            if not wstatus.skippedReminder:
+                def fetch_remind_response(client):
+                    with ndb_client.context():
+                        try:
+                            resp = "not sent"
+                            key_id = client.id()
+                            client = client.get()
+                            now = datetime.now() + timedelta(hours=8)
+                            if now.hour == 0 or now.hour == 12:
+                                if client.status in valid_command_states:
+                                    if client.temp != 'error':
+                                        client.temp = 'none'
+                                        client.status = 'offline,endgame 2'
+                            if client.temp == 'none':
+                                if (12 > now.hour >= client.remindAM) or (
+                                        now.hour >= 12 and now.hour >= client.remindPM):
+                                    temperatures = generateTemperatures()
+                                    text = strftime(now, strings["remind_offline"])
+                                    payload = {
+                                        'chat_id': str(key_id),
+                                        'text': text,
+                                        "parse_mode": "HTML",
+                                        'reply_markup': {
+                                            "keyboard": temperatures,
+                                            "one_time_keyboard": True
+                                        }
+                                    }
+                                    resp = telegramApi.sendMessage(payload)
+                                    if not resp['ok']:
+                                        if resp['description'] == 'Forbidden: bot was blocked by the user':
+                                            client.blocked = True
+                                    client.status = 'endgame 2'
+                            client.put()
+                            return client, str(key_id), resp, None
+                        except Exception as e:
+                            return client, str(client.id()), None, e
+
+                all_clients = Client.query().fetch(keys_only=True)
+                start = timer()
+                remind_results = ThreadPool(THREAD_NUMBER).imap_unordered(fetch_remind_response, all_clients)
+                i = 0
+                p = 0
+                f = 0
+                b = 0
+
+                for client, key_id, resp, e in remind_results:
+                    if e is None:
+                        if resp != "not sent":
                             i += 1
-                    client.put()
+                            if resp["ok"]:
+                                logging.info('remind response for {}: {}'.format(key_id, resp["result"]))
+                                p += 1
+                            else:
+                                logging.info('remind response for {}: {}'.format(key_id, resp["description"]))
+                                if resp["error_code"] == 403:
+                                    b += 1
+                                else:
+                                    f += 1
+                    else:
+                        logging.error(e)
+                        f += 1
+
                 wstatus.skippedReminder = True
                 wstatus.put()
-                return 'website offline. notification sent to {} clients'.format(i)
+
+                logging.info('website offline. notification sent to {} clients. '
+                             'successes: {} blocked: {} failures: {} elapsed time: {}'.format(
+                    str(i), str(p), str(b), str(f), str(timer() - start)))
+                return 'website offline. notification sent to {} clients. ' \
+                       'successes: {} blocked: {} failures: {} elapsed time: {}'.format(
+                    str(i), str(p), str(b), str(f), str(timer() - start))
             return "website offline"
-        else:
-            all_clients = Client.query().fetch(keys_only=True)
-            i = 0
-            for client in all_clients:
-                key_id = client.id()
-                client = client.get()
-                now = datetime.now() + timedelta(hours=8)
-                if now.hour == 0 or now.hour == 12:
-                    if client.status in valid_command_states:
-                        if client.temp != 'error':
-                            client.temp = 'none'
-                            client.status = 'endgame 2'
-                if client.temp == 'none':
-                    if (12 > now.hour >= client.remindAM) or (now.hour >= 12 and now.hour >= client.remindPM):
-                        temperatures = generateTemperatures()
-                        if now.hour < 12:
-                            if wstatus.skippedReminder:
-                                text = strings["remind_delayed"] + strftime(now, strings["window_open_AM"])
-                            else:
-                                text = strftime(now, strings["window_open_AM"])
-                        else:
-                            if wstatus.skippedReminder:
-                                text = strings["remind_delayed"] + strftime(now, strings["window_open_PM"])
-                            else:
-                                text = strftime(now, strings["window_open_PM"])
-                        payload = {
-                            'chat_id': str(key_id),
-                            'text': text,
-                            "parse_mode": "HTML",
-                            'reply_markup': {
-                                "keyboard": temperatures,
-                                "one_time_keyboard": True
-                            }
-                        }
-                        resp = telegramApi.sendMessage(payload)
-                        logging.info('remind send response:')
-                        logging.info(resp)
-                        if not resp['ok']:
-                            if resp['description'] == 'Forbidden: bot was blocked by the user':
-                                client.blocked = True
-                        client.status = 'endgame 2'
-                        i += 1
-                client.put()
-            return 'reminder sent to {} clients'.format(i)
 
     if context:
         resp = remind()
@@ -307,32 +412,63 @@ def remind(context=None):
 @app.route(getRouteUrl("broadcast"), methods=["POST"])
 def broadcast():
     with ndb_client.context():
-        try:
-            id_list = request.get_json()['ids']
-            for key_id in id_list:
-                payload = {
-                    'chat_id': str(key_id),
-                    'text': request.get_json()['msg'],
-                    'parse_mode': 'HTML'
-                }
+        # try:
+        #     id_list = request.get_json()['ids']
+        #     for key_id in id_list:
+        #         payload = {
+        #             'chat_id': str(key_id),
+        #             'text': request.get_json()['msg'],
+        #             'parse_mode': 'HTML'
+        #         }
+        #         resp = telegramApi.sendMessage(payload)
+        #         logging.info('broadcast response for {}:'.format(str(key_id)))
+        #         logging.info(resp)
+        #     return 'broadcast sent to {} clients'.format(str(len(id_list)))
+        # except:
+        def fetch_broadcast_response(params):
+            [key_id, payload] = params
+            try:
                 resp = telegramApi.sendMessage(payload)
-                logging.info('broadcast response for {}:'.format(str(key_id)))
-                logging.info(resp)
-            return 'broadcast sent to {} clients'.format(str(len(id_list)))
-        except:
-            all_clients = Client.query().fetch(keys_only=True)
-            for client in all_clients:
-                key_id = client.id()
-                payload = {
-                    'chat_id': str(key_id),
-                    'text': request.get_json()['msg'],
-                    'parse_mode': 'HTML'
-                }
-                resp = telegramApi.sendMessage(payload)
-                logging.info('broadcast response for {}:'.format(str(key_id)))
-                logging.info(resp)
-            return 'broadcast sent to {} clients'.format(str(len(all_clients)))
+                return key_id, resp, None
+            except Exception as e:
+                return key_id, None, e
 
+        all_clients = Client.query().fetch(keys_only=True)
+
+        text = request.get_json()['msg']
+        param_list = [None] * len(all_clients)
+
+        for i in range(len(all_clients)):
+            key_id = str(all_clients[i].id())
+            payload = {
+                'chat_id': key_id,
+                'text': text,
+                'parse_mode': 'HTML'
+            }
+            param_list[i] = [key_id, payload]
+
+        start = timer()
+        broadcast_results = ThreadPool(THREAD_NUMBER).imap_unordered(fetch_broadcast_response, param_list)
+        p = 0
+        f = 0
+        b = 0
+        for key_id, resp, e in broadcast_results:
+            if e is None:
+                if resp["ok"]:
+                    logging.info('broadcast response for {}: {}'.format(key_id, resp["result"]))
+                    p += 1
+                else:
+                    logging.info('broadcast response for {}: {}'.format(key_id, resp["description"]))
+                    if resp["error_code"] == 403:
+                        b += 1
+                    else:
+                        f += 1
+            else:
+                logging.error(e)
+                f += 1
+
+        return 'broadcast sent to {} clients. successes: {} blocked: {} failures: {} elapsed time: {}'.format(
+            str(len(all_clients)), str(p), str(b), str(f), str(timer() - start))
 
 
 @app.route(getRouteUrl("webhook"), methods=["POST"])
@@ -660,7 +796,7 @@ def webhook():
                 client.put()
                 return response
             elif text == strings["pin_keyboard"]:  # triggered if user set pin after prompted to by bot
-                groupFlag = setGroupId(client, 'https://temptaking.ado.sg/group/{}'.format(client.groupId))
+                groupFlag = setGroupId(client, '{}/group/{}'.format(wstatus.url, client.groupId))
                 if groupFlag == 0:
                     websiteStatus(True)
                     if not wstatus.status:
@@ -992,7 +1128,7 @@ def webhook():
             return response
 
         elif client.status == 'remind wizard 2':
-            if text not in [f'{x:02}:01' for x in range(12,24)]:
+            if text not in [f'{x:02}:01' for x in range(12, 24)]:
                 hours = generateHours(12)
                 msg = strings["invalid_reminder_time"]
                 markup = {
