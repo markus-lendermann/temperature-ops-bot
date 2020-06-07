@@ -127,8 +127,7 @@ def submitTemp(client, temp):
             'pin': client.pin
         }
         r = requests.post(url, data=payload)
-        logging.info('submit temp response:')
-        logging.info(r.text)
+        logging.info('submit temp response: {}'.format(r.text))
     except Exception as e:
         # TODO: proper exception handling has to be done tbh
         logging.error(e)
@@ -475,8 +474,7 @@ def broadcast():
 def webhook():
     with ndb_client.context():
         body = request.get_json()
-        logging.info('request body:')
-        logging.info(body)
+        logging.info('request body: {}'.format(body))
         response = json.dumps(body)
 
         update_id = body['update_id']
@@ -518,8 +516,7 @@ def webhook():
             else:
                 logging.error('no msg specified')
                 resp = None
-            logging.info('send response:')
-            logging.info(resp)
+            logging.info('send response: {}'.format(resp))
 
         # message function used in context of this response only
         def message(msg=None, markup=None):
@@ -541,8 +538,7 @@ def webhook():
             else:
                 logging.error('no msg specified')
                 resp = None
-            logging.info('send response:')
-            logging.info(resp)
+            logging.info('send response: {}'.format(resp))
 
         # message specific person only
         def messageMe(chat_id_list, msg=None, markup=None):
@@ -565,8 +561,7 @@ def webhook():
                 else:
                     logging.error('no msg specified')
                     resp = None
-                logging.info('messageMe() send response:'.format(id))
-                logging.info(resp)
+                logging.info('messageMe() send response: {}'.format(resp))
 
         def setGroupId(client, group_url):
             group_string = 'temptaking.ado.sg/group/'
