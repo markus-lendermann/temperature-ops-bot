@@ -224,7 +224,7 @@ def websiteStatus(context=None):
                     wstatus.skippedReminder = False  # only update this after calling remind()
                 wstatus.put()
 
-                logging.debug(
+                logging.info(
                     'online notification sent to {} clients. '
                     'successes: {} blocked: {} failures: {} elapsed time: {}'.format(
                         str(i), str(p), str(b), str(f), str(timer() - start)))
@@ -322,7 +322,7 @@ def remind(context=None):
                     logging.error(e)
                     f += 1
 
-            logging.debug('reminder sent to {} clients. successes: {} blocked: {} failures: {} elapsed time: {}'.format(
+            logging.info('reminder sent to {} clients. successes: {} blocked: {} failures: {} elapsed time: {}'.format(
                 str(i), str(p), str(b), str(f), str(timer() - start)))
             return 'reminder sent to {} clients. successes: {} blocked: {} failures: {} elapsed time: {}'.format(
                 str(i), str(p), str(b), str(f), str(timer() - start))
@@ -392,7 +392,7 @@ def remind(context=None):
                 wstatus.skippedReminder = True
                 wstatus.put()
 
-                logging.debug('website offline. notification sent to {} clients. '
+                logging.info('website offline. notification sent to {} clients. '
                              'successes: {} blocked: {} failures: {} elapsed time: {}'.format(
                     str(i), str(p), str(b), str(f), str(timer() - start)))
                 return 'website offline. notification sent to {} clients. ' \
