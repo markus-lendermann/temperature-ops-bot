@@ -226,11 +226,11 @@ def websiteStatus(context=None):
 
                 logging.info(
                     'online notification sent to {} clients. '
-                    'successes: {} blocked: {} failures: {} elapsed time: {}'.format(
-                        str(i), str(p), str(b), str(f), str(timer() - start)))
+                    'successes: {} blocked: {} failures: {} elapsed time: {} rate: {}'.format(
+                        str(i), str(p), str(b), str(f), str(timer() - start), str(i/(timer() - start))))
                 return 'online notification sent to {} clients. ' \
-                       'successes: {} blocked: {} failures: {} elapsed time: {}'.format(
-                    str(i), str(p), str(b), str(f), str(timer() - start))
+                       'successes: {} blocked: {} failures: {} elapsed time: {} rate: {}'.format(
+                    str(i), str(p), str(b), str(f), str(timer() - start), str(i/(timer() - start)))
         except Exception as e:
             logging.error(e)
             if wstatus.status:
@@ -322,10 +322,10 @@ def remind(context=None):
                     logging.error(e)
                     f += 1
 
-            logging.info('reminder sent to {} clients. successes: {} blocked: {} failures: {} elapsed time: {}'.format(
-                str(i), str(p), str(b), str(f), str(timer() - start)))
-            return 'reminder sent to {} clients. successes: {} blocked: {} failures: {} elapsed time: {}'.format(
-                str(i), str(p), str(b), str(f), str(timer() - start))
+            logging.info('reminder sent to {} clients. successes: {} blocked: {} failures: {} elapsed time: {} rate: {}'.format(
+                str(i), str(p), str(b), str(f), str(timer() - start), str(i/(timer() - start))))
+            return 'reminder sent to {} clients. successes: {} blocked: {} failures: {} elapsed time: {} rate: {}'.format(
+                str(i), str(p), str(b), str(f), str(timer() - start), str(i/(timer() - start)))
         else:
             if not wstatus.skippedReminder:
                 def fetch_remind_response(client):
@@ -393,11 +393,11 @@ def remind(context=None):
                 wstatus.put()
 
                 logging.info('website offline. notification sent to {} clients. '
-                             'successes: {} blocked: {} failures: {} elapsed time: {}'.format(
-                    str(i), str(p), str(b), str(f), str(timer() - start)))
+                             'successes: {} blocked: {} failures: {} elapsed time: {} rate: {}'.format(
+                    str(i), str(p), str(b), str(f), str(timer() - start), str(i/(timer() - start))))
                 return 'website offline. notification sent to {} clients. ' \
-                       'successes: {} blocked: {} failures: {} elapsed time: {}'.format(
-                    str(i), str(p), str(b), str(f), str(timer() - start))
+                       'successes: {} blocked: {} failures: {} elapsed time: {} rate: {}'.format(
+                    str(i), str(p), str(b), str(f), str(timer() - start), str(i/(timer() - start)))
             return "website offline"
 
     if context:
@@ -467,8 +467,8 @@ def broadcast():
                 logging.error(e)
                 f += 1
 
-        return 'broadcast sent to {} clients. successes: {} blocked: {} failures: {} elapsed time: {}'.format(
-            str(len(all_clients)), str(p), str(b), str(f), str(timer() - start))
+        return 'broadcast sent to {} clients. successes: {} blocked: {} failures: {} elapsed time: {} rate: {}'.format(
+            str(len(all_clients)), str(p), str(b), str(f), str(timer() - start), str(len(all_clients)/(timer() - start)))
 
 
 @app.route(getRouteUrl("webhook"), methods=["POST"])
