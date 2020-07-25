@@ -479,10 +479,13 @@ def webhook():
         response = json.dumps(body)
 
         update_id = body['update_id']
-        try:
+        if 'message' in body:
             message = body['message']
-        except:
+        elif 'edited_message' in body:
             message = body['edited_message']
+        else:
+            logging.info("no message or edited message found")
+            return response
         message_id = message.get('message_id')
         date = message.get('date')
         text = message.get('text')

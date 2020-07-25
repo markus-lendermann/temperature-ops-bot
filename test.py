@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 
 def loadTokens():
-    with open("tokens.json", encoding="utf-8") as tf:
+    with open("tokensv2.json", encoding="utf-8") as tf:
         tokens = json.load(tf)
 
     return tokens
@@ -52,8 +52,10 @@ now = datetime.now()
 #
 # msg = strings["reminder_existing_config"].format("00:01", "12:01") + strings["reminder_change_config"].format("AM")
 #
-msg = '<i>[Sent by Admin]</i>\n\n<b>CHANGELOG: V1.5</b>\n\n<b>1. Groups containing members with special characters in their names (including emojis) are now valid.</b> Previously, the bot would respond with "This isn\'t a valid temptaking url". It is unclear how many people were affected by this issue previously, but those who know any previously affected can inform them of this fix.'
-print(sendBroadcast(msg))
+# msg = '<i>[Sent by Admin]</i>\n\n<b>CHANGELOG: V1.5</b>\n\n<b>1. Groups containing members with special characters in their names (including emojis) are now valid.</b> Previously, the bot would respond with "This isn\'t a valid temptaking url". It is unclear how many people were affected by this issue previously, but those who know any previously affected can inform them of this fix.'
+# print(sendBroadcast(msg))
+
+print(sendBroadcast('<i>[Sent by Admin]</i>\n\nDear users,\n\n<b>The bot is back online.</b> Fixed a crash caused by users using other bots to message this one.\n\nThis bot now ignores other bots. Will fix in future update.'))
 
 
 
