@@ -1,5 +1,6 @@
 venv/
 .idea/
+.vscode/
 
 tokens.json
 tokensv2.json
